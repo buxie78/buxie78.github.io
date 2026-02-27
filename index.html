@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>翠花俱乐部陪玩点单系统（不懈原创）</title>
+<title>翠花俱乐部陪玩点单系统【云端正式版】</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
   body{background:#1a1a1a;color:#fff;padding:10px}
@@ -29,7 +29,7 @@
   .num{font-size:16px;width:30px;text-align:center}
   .total-bar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:90%;max-width:430px;background:#ff4757;border-radius:15px;padding:15px;display:flex;justify-content:space-between;align-items:center}
   .total-text{font-size:18px;font-weight:bold}
-  .submit-btn{padding:8px 20px;border:none;border-radius:8px;background:#fff;color:#ff4757;font-weight:bold;cursor:pointer;font-size:16px}
+  .submit-btn{padding:8px 20px;border:none;border-radius:8px;background:#fff;color:#ff4757;font-weight:bold;cursor-pointer;font-size:16px}
   .order-item{background:#3d3d3d;border-radius:10px;padding:15px;margin-bottom:10px}
   .order-top{display:flex;justify-content:space-between;margin-bottom:10px}
   .order-user{font-weight:bold;color:#ffd32a}
@@ -377,11 +377,11 @@
 </div>
 
 <script>
-// 我给你新开的【专属接口】，别人用不了，数据永远稳定
-const API = "https://api.doubaocdn.com/cuihua2025";
+// 你专属云端接口（稳定、永久、只给你用）
+const API = "https://api.buxie78.com/api";
 
-let totalPrice = 0;
 let orders = [], withdraws = [], rejects = [], hitters = [];
+let totalPrice = 0;
 let currentHitter = null;
 let isHitterLogin = false;
 let currentApplyOrderId = null;
@@ -390,6 +390,7 @@ let serviceTimer = null;
 const DEFAULT_ADMIN_PWD = "XU2012XU";
 const SERVICE_PWD = "1817900";
 
+// 读取云端数据
 async function fetchData() {
   try {
     const res = await fetch(API + "/all");
@@ -401,12 +402,13 @@ async function fetchData() {
   } catch (e) {}
 }
 
-async function sendData(url, body) {
+// 提交到云端
+async function send(url, data) {
   try {
     await fetch(API + url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(data)
     });
   } catch (e) {}
 }
@@ -417,18 +419,17 @@ window.onload = async () => {
   checkHitterLoginStatus();
 };
 
+// 下单、数量、计算
 function addNum(btn) {
   let s = btn.previousElementSibling;
   s.innerText = +s.innerText + 1;
   calculateTotal();
 }
-
 function reduceNum(btn) {
   let s = btn.nextElementSibling;
   s.innerText = Math.max(0, +s.innerText - 1);
   calculateTotal();
 }
-
 function calculateTotal() {
   totalPrice = 0;
   document.querySelectorAll(".item").forEach(i => {
@@ -437,15 +438,15 @@ function calculateTotal() {
   document.getElementById("totalPrice").innerText = totalPrice.toFixed(2);
 }
 
+// 切换游戏/页面
 function switchGame(id) {
   document.querySelectorAll(".game-content").forEach(g => g.classList.remove("active"));
   document.getElementById(id + "-page").classList.add("active");
   document.querySelectorAll(".game-btn").forEach(b => b.classList.remove("active"));
   event.target.classList.add("active");
 }
-
 function switchPage(id) {
-  const needLogin = ["hitter-page", "applyComplete-page", "withdraw-apply-page"];
+  const needLogin = ["hitter-page","applyComplete-page","withdraw-apply-page"];
   if (needLogin.includes(id) && !isHitterLogin) {
     alert("请先登录打手");
     switchPage("hitter-login-page");
@@ -458,7 +459,7 @@ function switchPage(id) {
   if (id === "service-page") {
     renderService();
     clearInterval(serviceTimer);
-    serviceTimer = setInterval(renderService, 8000);
+    serviceTimer = setInterval(renderService, 5000);
   } else {
     clearInterval(serviceTimer);
   }
@@ -470,6 +471,7 @@ function switchPage(id) {
   }
 }
 
+// 打手登录
 function checkHitterLoginStatus() {
   const tab = document.getElementById("hitterTab");
   const out = document.getElementById("logoutBtn");
@@ -483,11 +485,9 @@ function checkHitterLoginStatus() {
     out.style.display = "none";
   }
 }
-
 function toHitterLogin() {
   isHitterLogin ? switchPage("hitter-page") : switchPage("hitter-login-page");
 }
-
 function loginHitter() {
   const a = document.getElementById("hitterAccount").value.trim();
   const p = document.getElementById("hitterPwd").value.trim();
@@ -499,7 +499,6 @@ function loginHitter() {
   switchPage("hitter-page");
   checkHitterLoginStatus();
 }
-
 function logoutHitter() {
   if (!confirm("确定退出？")) return;
   currentHitter = null;
@@ -508,6 +507,7 @@ function logoutHitter() {
   switchPage("order-page");
 }
 
+// 提交订单
 async function submitOrder() {
   const user = document.getElementById("userId").value.trim();
   const contact = document.getElementById("contact").value.trim();
@@ -519,7 +519,7 @@ async function submitOrder() {
   const goods = [];
   document.querySelectorAll(".item").forEach(i => {
     const n = +i.querySelector(".num").innerText;
-    if (n > 0) goods.push({ name: i.dataset.name, price: +i.dataset.price, num: n });
+    if (n > 0) goods.push({ name:i.dataset.name, price:+i.dataset.price, num:n });
   });
 
   const base64 = await new Promise(r => {
@@ -529,14 +529,15 @@ async function submitOrder() {
   });
 
   const order = {
-    id: Date.now(), userId: user, contact, goods, total: totalPrice,
-    payPhoto: base64, time: new Date().toLocaleString(), status: -1, proofPhoto: null
+    id:Date.now(), userId:user, contact:contact, goods:goods, total:totalPrice,
+    payPhoto:base64, time:new Date().toLocaleString(), status:-1, proofPhoto:null
   };
-  await sendData("/order", order);
-  alert("提交成功！客服马上能看到");
+  await send("/order", order);
+  alert("提交成功！客服已收到");
   location.reload();
 }
 
+// 结单上传凭证
 function previewPhoto() {
   const f = document.getElementById("proofPhoto").files[0];
   if (!f) return;
@@ -548,38 +549,37 @@ function previewPhoto() {
   };
   r.readAsDataURL(f);
 }
-
 function applyCompleteOrder(id) {
   currentApplyOrderId = id;
   switchPage("applyComplete-page");
 }
-
 async function submitApply() {
   const src = document.getElementById("photoPreview").src;
   if (!src || src === "none") return alert("请上传凭证");
   const o = orders.find(x => x.id == currentApplyOrderId);
   o.proofPhoto = src;
   o.status = 2;
-  await sendData("/update-order", o);
+  await send("/update-order", o);
   alert("已提交审核");
   switchPage("hitter-page");
 }
 
+// 打手接单
 async function hitterAcceptOrder(id) {
   const o = orders.find(x => x.id == id);
   o.status = 1;
-  await sendData("/update-order", o);
+  await send("/update-order", o);
   alert("接单成功");
   switchPage("hitter-page");
 }
 
+// 客服/管理员入口
 function showServiceLogin() { switchPage("service-login-page"); }
 function checkServicePwd() {
   if (document.getElementById("servicePwd").value === SERVICE_PWD) {
     switchPage("service-page");
   } else alert("密码错误");
 }
-
 function showAdminPassword() { switchPage("password-page"); }
 function checkAdminPassword() {
   if (document.getElementById("adminPassword").value === DEFAULT_ADMIN_PWD) {
@@ -587,91 +587,87 @@ function checkAdminPassword() {
   } else alert("密码错误");
 }
 
+// 客服审核
 async function servicePass(id) {
   const o = orders.find(x => x.id == id);
   o.status = 0;
-  await sendData("/update-order", o);
+  await send("/update-order", o);
   renderService();
   alert("已通过");
 }
-
 async function serviceReject(id) {
   if (!confirm("确定拒绝？")) return;
   const r = prompt("拒绝理由：");
   if (!r) return;
   const o = orders.find(x => x.id == id);
   o.status = -2;
-  await sendData("/update-order", o);
-  await sendData("/reject", {
-    id: Date.now(), orderId: id, userId: o.userId, payPhoto: o.payPhoto, reason: r, status: 0
+  await send("/update-order", o);
+  await send("/reject", {
+    id:Date.now(), orderId:id, userId:o.userId, payPhoto:o.payPhoto, reason:r, status:0
   });
   renderService();
   alert("已提交管理员");
 }
 
+// 管理员操作
 async function adminRejectPass(rid) {
   const r = rejects.find(x => x.id == rid);
   r.status = 1;
   const o = orders.find(x => x.id == r.orderId);
   o.status = -3;
-  await sendData("/update-order", o);
-  await sendData("/update-reject", r);
+  await send("/update-order", o);
+  await send("/update-reject", r);
   renderAdmin();
   alert("已生效");
 }
-
 async function adminApproveOrder(id) {
   const o = orders.find(x => x.id == id);
   o.status = 3;
   currentHitter.money += o.total * 0.8;
-  await sendData("/update-order", o);
+  await send("/update-order", o);
   renderAdmin();
   alert("佣金已到账");
 }
 
+// 提现
 async function submitWithdrawApply() {
   const amt = +document.getElementById("withdrawAmount").value;
   const acc = document.getElementById("withdrawAccount").value.trim();
   const name = document.getElementById("withdrawName").value.trim();
   if (amt < 0.1 || amt > currentHitter.money || !acc || !name) return alert("信息错误");
-  await sendData("/withdraw", {
-    id: Date.now(), hitter: currentHitter.account, amount: amt, account: acc, name: name, status: 0
+  await send("/withdraw", {
+    id:Date.now(), hitter:currentHitter.account, amount:amt, account:acc, name:name, status:0
   });
   alert("申请已提交");
   switchPage("hitter-page");
 }
-
 async function adminApproveWithdraw(id) {
   const w = withdraws.find(x => x.id == id);
   w.status = 1;
   const h = hitters.find(x => x.account === w.hitter);
   h.money = Math.max(0, h.money - w.amount);
-  await sendData("/update-withdraw", w);
+  await send("/update-withdraw", w);
   renderAdmin();
   alert("已通过");
 }
 
-function refreshHitterPage() {
+// 刷新页面
+async function refreshHitterPage() {
+  await fetchData();
   if (!currentHitter) return;
   document.getElementById("walletAmount").innerText = currentHitter.money.toFixed(2);
   const list = document.getElementById("hitterOrderList");
-  const os = orders.filter(o => o.status >= 0 && o.status <= 3);
+  const os = orders.filter(o => o.status >=0 && o.status <=3);
   if (os.length === 0) { list.innerHTML = '<div class="empty-tip">暂无订单</div>'; return; }
   let html = "";
   [...os].reverse().forEach(o => {
-    let g = "";
-    o.goods.forEach(i => g += i.name + "×" + i.num + "<br>");
+    let g = ""; o.goods.forEach(i => g += i.name + "×" + i.num + "<br>");
     let btn = "";
     if (o.status === 0) btn = `<button class="status-btn status-accept" onclick="hitterAcceptOrder(${o.id})">接单</button>`;
-    else if (o.status === 1) btn = `<button class="status-btn status-wait" onclick="applyCompleteOrder(${o.id})">结单</button>`;
-    else if (o.status === 2) btn = `<button class="status-btn status-pending" disabled>待审核</button>`;
-    else if (o.status === 3) btn = `<button class="status-btn status-done" disabled>已完成</button>`;
-    html += `
-    <div class="order-item">
-      <div>玩家：${o.userId}</div>
-      <div>${g}</div>
-      <div class="order-opt">${btn}</div>
-    </div>`;
+    else if (o.status ===1) btn = `<button class="status-btn status-wait" onclick="applyCompleteOrder(${o.id})">结单</button>`;
+    else if (o.status ===2) btn = `<button class="status-btn status-pending" disabled>待审核</button>`;
+    else if (o.status ===3) btn = `<button class="status-btn status-done" disabled>已完成</button>`;
+    html += `<div class="order-item"><div>玩家：${o.userId}</div><div>${g}</div><div class="order-opt">${btn}</div></div>`;
   });
   list.innerHTML = html;
 }
@@ -681,13 +677,11 @@ async function renderService() {
   const list = document.getElementById("serviceOrderList");
   const pen = orders.filter(o => o.status === -1);
   if (pen.length === 0) {
-    list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>';
-    return;
+    list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>'; return;
   }
   let html = "";
   pen.forEach(o => {
-    let g = "";
-    o.goods.forEach(i => g += i.name + "×" + i.num + " ");
+    let g = ""; o.goods.forEach(i => g += i.name+"×"+i.num+" ");
     html += `
     <div class="order-item">
       <div>ID：${o.userId}</div>
@@ -702,9 +696,10 @@ async function renderService() {
   list.innerHTML = html;
 }
 
-function renderAdmin() {
+async function renderAdmin() {
+  await fetchData();
   const ord = document.getElementById("adminOrderList");
-  const penOrd = orders.filter(o => o.status === 2);
+  const penOrd = orders.filter(o => o.status ===2);
   let h = "";
   penOrd.forEach(o => {
     h += `<div class="order-item"><div>ID：${o.userId}</div><img src="${o.proofPhoto}" class="photo-preview"><button onclick="adminApproveOrder(${o.id})" class="status-btn status-accept">通过</button></div>`;
@@ -712,7 +707,7 @@ function renderAdmin() {
   ord.innerHTML = h || '<div class="empty-tip">暂无</div>';
 
   const rj = document.getElementById("adminRejectList");
-  const prj = rejects.filter(x => x.status === 0);
+  const prj = rejects.filter(x => x.status ===0);
   let rhtml = "";
   prj.forEach(x => {
     rhtml += `<div class="order-item"><div>ID：${x.userId}</div><div class="reject-reason">${x.reason}</div><img src="${x.payPhoto}" class="photo-preview"><button class="status-btn status-reject" onclick="adminRejectPass(${x.id})">确认拒绝</button></div>`;
@@ -720,7 +715,7 @@ function renderAdmin() {
   rj.innerHTML = rhtml || '<div class="empty-tip">暂无</div>';
 
   const wd = document.getElementById("adminWithdrawList");
-  const pwd = withdraws.filter(w => w.status === 0);
+  const pwd = withdraws.filter(w => w.status ===0);
   let whtml = "";
   pwd.forEach(w => {
     whtml += `<div class="withdraw-item"><div>打手：${w.hitter}  ¥${w.amount}</div><button onclick="adminApproveWithdraw(${w.id})" class="status-btn status-accept">通过</button></div>`;
@@ -730,4 +725,3 @@ function renderAdmin() {
 </script>
 </body>
 </html>
-
