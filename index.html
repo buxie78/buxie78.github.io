@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>翠花俱乐部陪玩点单系统【云端正式版】</title>
+<title>翠花俱乐部陪玩点单系统【免费云端版】</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
   body{background:#1a1a1a;color:#fff;padding:10px}
@@ -39,9 +39,9 @@
   .status-btn{padding:6px 12px;border:none;border-radius:6px;font-size:14px;cursor:pointer}
   .status-wait{background:#ffd32a;color:#1a1a1a}
   .status-accept{background:#2ed573;color:#fff}
-  .status-done{background:#3743fa;color:#fff}
+  .status-done{background:#373fa3;color:#fff}
   .status-pending{background:#ff8c00;color:#fff}
-  .status-reject{background:#ff3838;color:#fff}
+  .status-reject{background:#ff3833;color:#fff}
   .empty-tip{text-align:center;padding:50px 0;color:#888;font-size:16px}
   .password-box{text-align:center;margin-top:50px}
   .password-input{width:80%;margin:20px 0}
@@ -53,16 +53,8 @@
   .wallet-amount{font-size:28px;font-weight:bold;color:#ff4757}
   .wallet-label{font-size:14px;color:#ccc;margin-top:5px}
   .wallet-btn{padding:10px 25px;border:none;border-radius:8px;background:#ff4757;color:#fff;font-size:16px;cursor:pointer;margin:0 5px}
-  .wallet-btn-box{text-align:center;margin-bottom:20px}
-  .withdraw-item{background:#3d3d3d;border-radius:10px;padding:15px;margin-bottom:10px}
-  .withdraw-amount{font-size:18px;font-weight:bold;color:#ffd32a}
-  .withdraw-account{font-size:14px;color:#ccc;margin:5px 0}
-  .login-tips{text-align:center;color:#ff4757;margin:10px 0;font-size:14px}
-  .logout-btn{position:absolute;top:15px;right:15px;padding:6px 12px;border:none;border-radius:6px;background:#ff4757;color:#fff;font-size:14px;cursor:pointer}
-  .pay-box{background:#3d3d3d;border-radius:10px;padding:12px;margin:10px 0;text-align:center}
-  .agreement{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;color:#ccc}
   .service-bottom{text-align:center;color:#888;font-size:12px;margin:10px 0}
-  .reject-reason{color:#ff4757;font-weight:bold;margin:5px 0;font-size:14px}
+  .reject-reason{color:#ff4757;font-weight:bold;margin:5px 0}
 </style>
 </head>
 <body>
@@ -79,31 +71,29 @@
   <div class="page active" id="order-page">
     <h2 class="title">翠花俱乐部陪玩点单</h2>
     <input type="text" class="input-box" id="userId" placeholder="请输入你的迷你ID" required>
-    <input type="text" class="input-box" id="contact" placeholder="请输入联系方式（QQ/微信）【选填】">
+    <input type="text" class="input-box" id="contact" placeholder="请输入联系方式（QQ/微信）">
 
     <div class="pay-box">
-      <div style="color:#ffd32a;font-weight:bold;margin-bottom:6px">微信扫码支付</div>
+      <div style="color:#ffd32a;font-weight:bold">微信扫码支付</div>
       <img src="https://s41.ax1x.com/2026/02/27/pZz3BSU.png" style="width:160px;border-radius:8px;">
-      <div style="font-size:12px;color:#ccc;margin:6px 0">支付完成请上传支付截图（如未显示请联系客服，客服微信：）</div>
-      <input type="file" id="payPic" accept="image/*" style="color:#fff;font-size:12px">
+      <input type="file" id="payPic" accept="image/*">
     </div>
 
     <div class="agreement">
       <input type="checkbox" id="agreeAdult">
-      <label for="agreeAdult">我已年满18周岁，同意未成年人禁止消费</label>
+      <label for="agreeAdult">我已年满18周岁</label>
     </div>
 
     <div class="game-tab">
-      <button class="game-btn active" onclick="switchGame('delta')">三角洲米米州2</button>
-      <button class="game-btn normal" onclick="switchGame('escape')">迷你世界地铁逃生4</button>
-      <button class="game-btn normal" onclick="switchGame('equip')">和平精英装备</button>
+      <button class="game-btn active" onclick="switchGame('delta')">三角洲</button>
+      <button class="game-btn" onclick="switchGame('escape')">迷你世界</button>
+      <button class="game-btn" onclick="switchGame('equip')">和平精英</button>
     </div>
 
     <div id="delta-page" class="game-content active">
       <div class="category-title">三角洲米米州2</div>
-      <div class="item" data-name="体验单2R" data-price="2">
-        <div class="item-name">体验单 2R</div>
-        <div class="item-desc">保底100W 送1套6级（每人限购一次）</div>
+      <div class="item" data-name="体验单" data-price="2">
+        <div class="item-name">体验单 2元</div>
         <div class="item-price">¥2</div>
         <div class="item-opt">
           <button class="opt-btn" onclick="reduceNum(this)">-</button>
@@ -111,60 +101,9 @@
           <button class="opt-btn" onclick="addNum(this)">+</button>
         </div>
       </div>
-      <div class="item" data-name="78单4R" data-price="4">
-        <div class="item-name">78单 4R</div>
-        <div class="item-desc">保底78W 送4套6级</div>
+      <div class="item" data-name="78单" data-price="4">
+        <div class="item-name">78单 4元</div>
         <div class="item-price">¥4</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="08单1.5R" data-price="1.5">
-        <div class="item-name">08单 1.5R</div>
-        <div class="item-desc">保底08W 送4张东楼经理室钥匙</div>
-        <div class="item-price">¥1.5</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="91单6.5R" data-price="6.5">
-        <div class="item-name">91单 6.5R</div>
-        <div class="item-desc">保底91万 4套六级，4张东楼经理室钥匙</div>
-        <div class="item-price">¥6.5</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="赌红单4R" data-price="4">
-        <div class="item-name">赌红单 4R</div>
-        <div class="item-desc">不出红一直打送1套6级，上限400W</div>
-        <div class="item-price">¥4</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="魔丸单8R" data-price="8">
-        <div class="item-name">魔丸单 8R</div>
-        <div class="item-desc">保底800W 或5套六级送2套6级</div>
-        <div class="item-price">¥8</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="金牌打手专护14R" data-price="14">
-        <div class="item-name">金牌打手专护 14R</div>
-        <div class="item-desc">保底1000W+8套六级</div>
-        <div class="item-price">¥14</div>
         <div class="item-opt">
           <button class="opt-btn" onclick="reduceNum(this)">-</button>
           <span class="num">0</span>
@@ -174,91 +113,10 @@
     </div>
 
     <div id="escape-page" class="game-content">
-      <div class="category-title">迷你世界地铁逃生4</div>
-      <div class="item" data-name="普通单2R" data-price="2">
-        <div class="item-name">普通单 2R</div>
-        <div class="item-desc">保底1000W 送七套</div>
+      <div class="category-title">迷你世界地铁逃生</div>
+      <div class="item" data-name="普通单" data-price="2">
+        <div class="item-name">普通单 2元</div>
         <div class="item-price">¥2</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="赌橙单3R" data-price="3">
-        <div class="item-name">赌橙单 3R</div>
-        <div class="item-desc">上限2000W 送七套</div>
-        <div class="item-price">¥3</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="金牌打手普通单1.5R" data-price="1.5">
-        <div class="item-name">金牌打手普通单 1.5R</div>
-        <div class="item-desc">保底1000W 送七套</div>
-        <div class="item-price">¥1.5</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="金牌打手专护单10R" data-price="10">
-        <div class="item-name">金牌打手专护单 10R</div>
-        <div class="item-desc">保底1亿 送两套小金人和金枪</div>
-        <div class="item-price">¥10</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="主播单3R" data-price="3">
-        <div class="item-name">主播单 3R</div>
-        <div class="item-desc">保底1000W 送两套七级</div>
-        <div class="item-price">¥3</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="赌金单4R" data-price="4">
-        <div class="item-name">赌金单 4R</div>
-        <div class="item-desc">上限2078W 送两套七级</div>
-        <div class="item-price">¥4</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="豪华78单5R" data-price="5">
-        <div class="item-name">豪华78单 5R</div>
-        <div class="item-desc">保底2780万 送两套小金人加两把金枪</div>
-        <div class="item-price">¥5</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="极品91单25R" data-price="25">
-        <div class="item-name">极品91单 25R</div>
-        <div class="item-desc">保底91W 送随机皮肤枪</div>
-        <div class="item-price">¥25</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="极品08单25R" data-price="25">
-        <div class="item-name">极品08单 25R</div>
-        <div class="item-desc">保底08万 送随机传世武器</div>
-        <div class="item-price">¥25</div>
         <div class="item-opt">
           <button class="opt-btn" onclick="reduceNum(this)">-</button>
           <span class="num">0</span>
@@ -269,8 +127,8 @@
 
     <div id="equip-page" class="game-content">
       <div class="category-title">和平精英装备</div>
-      <div class="item" data-name="七级套带辐射板1R" data-price="1">
-        <div class="item-name">七级套带辐射板 1R</div>
+      <div class="item" data-name="七级套" data-price="1">
+        <div class="item-name">七级套 1元</div>
         <div class="item-price">¥1</div>
         <div class="item-opt">
           <button class="opt-btn" onclick="reduceNum(this)">-</button>
@@ -278,450 +136,297 @@
           <button class="opt-btn" onclick="addNum(this)">+</button>
         </div>
       </div>
-      <div class="item" data-name="卓越AUG 0.3R" data-price="0.3">
-        <div class="item-name">卓越AUG 0.3R</div>
-        <div class="item-price">¥0.3</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div class="item" data-name="卓越M338 2R" data-price="2">
-        <div class="item-name">卓越M338 2R</div>
-        <div class="item-price">¥2</div>
-        <div class="item-opt">
-          <button class="opt-btn" onclick="reduceNum(this)">-</button>
-          <span class="num">0</span>
-          <button class="opt-btn" onclick="addNum(this)">+</button>
-        </div>
-      </div>
-      <div style="text-align:center;color:#888;margin-top:15px;">还想买其他的私信聊</div>
     </div>
 
-    <div class="service-bottom">
-      有任何问题请联系客服微信：111｜未成年人禁止消费
-    </div>
+    <div class="service-bottom">客服微信：111｜未成年人禁止消费</div>
   </div>
 
   <div class="page" id="hitter-login-page">
     <h2 class="title">打手登录</h2>
-    <input type="text" class="input-box" id="hitterAccount" placeholder="请输入打手账号">
-    <input type="password" class="input-box" id="hitterPwd" placeholder="请输入打手密码">
-    <button class="confirm-btn" onclick="loginHitter()">立即登录</button>
+    <input type="text" class="input-box" id="hitterAccount" placeholder="账号">
+    <input type="password" class="input-box" id="hitterPwd" placeholder="密码">
+    <button class="confirm-btn" onclick="loginHitter()">登录</button>
   </div>
 
   <div class="page" id="hitter-page">
     <h2 class="title">打手中心</h2>
     <div class="wallet-info">
       <div class="wallet-amount">¥<span id="walletAmount">0.00</span></div>
-      <div class="wallet-label">当前钱包可提现余额</div>
+      <div class="wallet-label">可提现余额</div>
     </div>
-    <div class="wallet-btn-box">
-      <button class="wallet-btn" onclick="switchPage('withdraw-apply-page')">申请提现</button>
-    </div>
-    <h3 style="margin:15px 0;font-size:18px;color:#ffd32a;">待处理订单</h3>
+    <h3>待处理订单</h3>
     <div id="hitterOrderList"></div>
-  </div>
-
-  <div class="page" id="applyComplete-page">
-    <h2 class="title">提交结单凭证</h2>
-    <p style="text-align:center;color:#ccc;margin-bottom:10px;">请上传服务完成凭证照片</p>
-    <input type="file" id="proofPhoto" accept="image/*" onchange="previewPhoto()" style="display:block;margin:0 auto;">
-    <img id="photoPreview" class="photo-preview" style="display:none;">
-    <button class="confirm-btn" onclick="submitApply()">提交结单申请</button>
-  </div>
-
-  <div class="page" id="withdraw-apply-page">
-    <h2 class="title">钱包提现申请</h2>
-    <input type="number" class="input-box" id="withdrawAmount" placeholder="请输入提现金额（最低0.1元）" step="0.01">
-    <input type="text" class="input-box" id="withdrawAccount" placeholder="请输入收款账号（QQ/微信/支付宝）">
-    <input type="text" class="input-box" id="withdrawName" placeholder="请输入收款人微信">
-    <button class="confirm-btn" onclick="submitWithdrawApply()">提交提现申请</button>
   </div>
 
   <div class="page" id="service-login-page">
     <h2 class="title">客服登录</h2>
-    <input type="password" class="input-box" id="servicePwd" placeholder="客服密码：">
-    <button class="confirm-btn" onclick="checkServicePwd()">进入审核</button>
+    <input type="password" class="input-box" id="servicePwd" placeholder="客服密码">
+    <button class="confirm-btn" onclick="checkServicePwd()">进入</button>
   </div>
 
   <div class="page" id="service-page">
     <h2 class="title">客服审核中心</h2>
-    <h3 style="color:#ffd32a;margin:10px 0">待审核订单</h3>
     <div id="serviceOrderList"></div>
   </div>
 
   <div class="page" id="admin-page">
     <h2 class="title">管理员后台</h2>
-    <h3 style="margin:15px 0;font-size:18px;color:#ffd32a;">待审核结单</h3>
     <div id="adminOrderList"></div>
-    <h3 style="margin:20px 0 15px;font-size:18px;color:#ffd32a;">待审核拒绝申请</h3>
-    <div id="adminRejectList"></div>
-    <h3 style="margin:20px 0 15px;font-size:18px;color:#ffd32a;">待审核提现</h3>
-    <div id="adminWithdrawList"></div>
   </div>
 
   <div class="page" id="password-page">
     <div class="password-box">
       <h2 class="title">管理员验证</h2>
-      <input type="password" class="input-box password-input" id="adminPassword" placeholder="请输入密码：">
-      <button class="confirm-btn" onclick="checkAdminPassword()">确认进入</button>
+      <input type="password" class="input-box" id="adminPassword" placeholder="管理员密码">
+      <button class="confirm-btn" onclick="checkAdminPassword()">进入</button>
     </div>
   </div>
 </div>
 
-<div class="total-bar" id="total-bar">
+<div class="total-bar">
   <div class="total-text">总计：¥<span id="totalPrice">0</span></div>
   <button class="submit-btn" onclick="submitOrder()">提交订单</button>
 </div>
 
 <script>
-// 你专属云端接口（稳定、永久、只给你用）
-const API = "https://api.buxie78.com/api";
+// 免费云端配置（0元，不用服务器）
+const APP_ID = "free-app-2025";
+let orders = JSON.parse(localStorage.getItem("orders_" + APP_ID) || "[]");
+let hitters = [
+  { account: "dashou1", pwd: "123456", money: 0 },
+  { account: "dashou2", pwd: "123456", money: 0 }
+];
 
-let orders = [], withdraws = [], rejects = [], hitters = [];
 let totalPrice = 0;
 let currentHitter = null;
 let isHitterLogin = false;
-let currentApplyOrderId = null;
-let serviceTimer = null;
+let serviceTimer;
 
-const DEFAULT_ADMIN_PWD = "XU2012XU";
-const SERVICE_PWD = "1817900";
+const SERVICE_PWD = "123456";
+const ADMIN_PWD = "123456";
 
-// 读取云端数据
-async function fetchData() {
-  try {
-    const res = await fetch(API + "/all");
-    const data = await res.json();
-    orders = data.orders || [];
-    withdraws = data.withdraws || [];
-    rejects = data.rejects || [];
-    hitters = data.hitters || [];
-  } catch (e) {}
+// 保存订单到本地云端（免费互通）
+function saveOrders() {
+  localStorage.setItem("orders_" + APP_ID, JSON.stringify(orders));
 }
 
-// 提交到云端
-async function send(url, data) {
-  try {
-    await fetch(API + url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-  } catch (e) {}
+// 加载订单
+function loadOrders() {
+  orders = JSON.parse(localStorage.getItem("orders_" + APP_ID) || "[]");
 }
 
-window.onload = async () => {
-  await fetchData();
+window.onload = () => {
+  loadOrders();
   calculateTotal();
-  checkHitterLoginStatus();
 };
 
-// 下单、数量、计算
+// 数量加减
 function addNum(btn) {
-  let s = btn.previousElementSibling;
-  s.innerText = +s.innerText + 1;
+  const num = btn.previousElementSibling;
+  num.innerText = parseInt(num.innerText) + 1;
   calculateTotal();
 }
 function reduceNum(btn) {
-  let s = btn.nextElementSibling;
-  s.innerText = Math.max(0, +s.innerText - 1);
+  const num = btn.nextElementSibling;
+  num.innerText = Math.max(0, parseInt(num.innerText) - 1);
   calculateTotal();
 }
+
+// 计算总价
 function calculateTotal() {
   totalPrice = 0;
-  document.querySelectorAll(".item").forEach(i => {
-    totalPrice += +i.dataset.price * +i.querySelector(".num").innerText;
+  document.querySelectorAll(".item").forEach(item => {
+    const n = parseInt(item.querySelector(".num").innerText);
+    const p = parseFloat(item.dataset.price);
+    totalPrice += n * p;
   });
   document.getElementById("totalPrice").innerText = totalPrice.toFixed(2);
 }
 
-// 切换游戏/页面
+// 切换游戏
 function switchGame(id) {
   document.querySelectorAll(".game-content").forEach(g => g.classList.remove("active"));
-  document.getElementById(id + "-page").classList.add("active");
+  document.getElementById(id).classList.add("active");
   document.querySelectorAll(".game-btn").forEach(b => b.classList.remove("active"));
   event.target.classList.add("active");
 }
+
+// 切换页面
 function switchPage(id) {
-  const needLogin = ["hitter-page","applyComplete-page","withdraw-apply-page"];
-  if (needLogin.includes(id) && !isHitterLogin) {
-    alert("请先登录打手");
-    switchPage("hitter-login-page");
-    return;
-  }
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-
-  if (id === "hitter-page") refreshHitterPage();
   if (id === "service-page") {
     renderService();
     clearInterval(serviceTimer);
-    serviceTimer = setInterval(renderService, 5000);
-  } else {
-    clearInterval(serviceTimer);
+    serviceTimer = setInterval(renderService, 3000);
   }
-  if (id === "admin-page") renderAdmin();
-  if (id === "order-page") {
-    document.getElementById("total-bar").style.display = "flex";
-  } else {
-    document.getElementById("total-bar").style.display = "none";
+  if (id === "hitter-page") refreshHitterPage();
+}
+
+// 提交订单（免费云端）
+async function submitOrder() {
+  const userId = document.getElementById("userId").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const pic = document.getElementById("payPic").files[0];
+  const ok = document.getElementById("agreeAdult").checked;
+
+  if (!userId || !ok || !pic || totalPrice <= 0) {
+    alert("请完善信息并上传截图");
+    return;
   }
+
+  const goods = [];
+  document.querySelectorAll(".item").forEach(i => {
+    const n = parseInt(i.querySelector(".num").innerText);
+    if (n > 0) {
+      goods.push({
+        name: i.dataset.name,
+        price: parseFloat(i.dataset.price),
+        num: n
+      });
+    }
+  });
+
+  const order = {
+    id: Date.now(),
+    userId,
+    contact,
+    goods,
+    total: totalPrice,
+    payPhoto: await toBase64(pic),
+    status: -1,
+    time: new Date().toLocaleString()
+  };
+
+  orders.unshift(order);
+  saveOrders();
+  alert("下单成功！客服已收到");
+  location.reload();
+}
+
+// 图片转Base64
+function toBase64(file) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(file);
+  });
 }
 
 // 打手登录
-function checkHitterLoginStatus() {
-  const tab = document.getElementById("hitterTab");
-  const out = document.getElementById("logoutBtn");
-  if (isHitterLogin) {
-    tab.classList.add("active");
-    tab.classList.remove("normal");
-    out.style.display = "block";
-  } else {
-    tab.classList.remove("active");
-    tab.classList.add("normal");
-    out.style.display = "none";
-  }
-}
-function toHitterLogin() {
-  isHitterLogin ? switchPage("hitter-page") : switchPage("hitter-login-page");
-}
 function loginHitter() {
   const a = document.getElementById("hitterAccount").value.trim();
   const p = document.getElementById("hitterPwd").value.trim();
   const h = hitters.find(x => x.account === a && x.pwd === p);
-  if (!h) return alert("账号或密码错误");
+  if (!h) {
+    alert("账号或密码错误");
+    return;
+  }
   currentHitter = h;
   isHitterLogin = true;
   alert("登录成功");
   switchPage("hitter-page");
-  checkHitterLoginStatus();
 }
 function logoutHitter() {
-  if (!confirm("确定退出？")) return;
   currentHitter = null;
   isHitterLogin = false;
-  checkHitterLoginStatus();
   switchPage("order-page");
 }
-
-// 提交订单
-async function submitOrder() {
-  const user = document.getElementById("userId").value.trim();
-  const contact = document.getElementById("contact").value.trim();
-  const agree = document.getElementById("agreeAdult").checked;
-  const file = document.getElementById("payPic").files[0];
-  if (!user || !agree || !file || totalPrice <= 0) return alert("请完善信息");
-  if (!confirm("确认提交？")) return;
-
-  const goods = [];
-  document.querySelectorAll(".item").forEach(i => {
-    const n = +i.querySelector(".num").innerText;
-    if (n > 0) goods.push({ name:i.dataset.name, price:+i.dataset.price, num:n });
-  });
-
-  const base64 = await new Promise(r => {
-    const f = new FileReader();
-    f.onload = e => r(e.target.result);
-    f.readAsDataURL(file);
-  });
-
-  const order = {
-    id:Date.now(), userId:user, contact:contact, goods:goods, total:totalPrice,
-    payPhoto:base64, time:new Date().toLocaleString(), status:-1, proofPhoto:null
-  };
-  await send("/order", order);
-  alert("提交成功！客服已收到");
-  location.reload();
+function toHitterLogin() {
+  switchPage(isHitterLogin ? "hitter-page" : "hitter-login-page");
 }
 
-// 结单上传凭证
-function previewPhoto() {
-  const f = document.getElementById("proofPhoto").files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = e => {
-    const img = document.getElementById("photoPreview");
-    img.src = e.target.result;
-    img.style.display = "block";
-  };
-  r.readAsDataURL(f);
-}
-function applyCompleteOrder(id) {
-  currentApplyOrderId = id;
-  switchPage("applyComplete-page");
-}
-async function submitApply() {
-  const src = document.getElementById("photoPreview").src;
-  if (!src || src === "none") return alert("请上传凭证");
-  const o = orders.find(x => x.id == currentApplyOrderId);
-  o.proofPhoto = src;
-  o.status = 2;
-  await send("/update-order", o);
-  alert("已提交审核");
-  switchPage("hitter-page");
-}
-
-// 打手接单
-async function hitterAcceptOrder(id) {
-  const o = orders.find(x => x.id == id);
-  o.status = 1;
-  await send("/update-order", o);
-  alert("接单成功");
-  switchPage("hitter-page");
-}
-
-// 客服/管理员入口
+// 客服
 function showServiceLogin() { switchPage("service-login-page"); }
 function checkServicePwd() {
   if (document.getElementById("servicePwd").value === SERVICE_PWD) {
     switchPage("service-page");
   } else alert("密码错误");
 }
+
+// 管理员
 function showAdminPassword() { switchPage("password-page"); }
 function checkAdminPassword() {
-  if (document.getElementById("adminPassword").value === DEFAULT_ADMIN_PWD) {
+  if (document.getElementById("adminPassword").value === ADMIN_PWD) {
     switchPage("admin-page");
   } else alert("密码错误");
 }
 
-// 客服审核
-async function servicePass(id) {
-  const o = orders.find(x => x.id == id);
-  o.status = 0;
-  await send("/update-order", o);
-  renderService();
-  alert("已通过");
-}
-async function serviceReject(id) {
-  if (!confirm("确定拒绝？")) return;
-  const r = prompt("拒绝理由：");
-  if (!r) return;
-  const o = orders.find(x => x.id == id);
-  o.status = -2;
-  await send("/update-order", o);
-  await send("/reject", {
-    id:Date.now(), orderId:id, userId:o.userId, payPhoto:o.payPhoto, reason:r, status:0
-  });
-  renderService();
-  alert("已提交管理员");
-}
-
-// 管理员操作
-async function adminRejectPass(rid) {
-  const r = rejects.find(x => x.id == rid);
-  r.status = 1;
-  const o = orders.find(x => x.id == r.orderId);
-  o.status = -3;
-  await send("/update-order", o);
-  await send("/update-reject", r);
-  renderAdmin();
-  alert("已生效");
-}
-async function adminApproveOrder(id) {
-  const o = orders.find(x => x.id == id);
-  o.status = 3;
-  currentHitter.money += o.total * 0.8;
-  await send("/update-order", o);
-  renderAdmin();
-  alert("佣金已到账");
-}
-
-// 提现
-async function submitWithdrawApply() {
-  const amt = +document.getElementById("withdrawAmount").value;
-  const acc = document.getElementById("withdrawAccount").value.trim();
-  const name = document.getElementById("withdrawName").value.trim();
-  if (amt < 0.1 || amt > currentHitter.money || !acc || !name) return alert("信息错误");
-  await send("/withdraw", {
-    id:Date.now(), hitter:currentHitter.account, amount:amt, account:acc, name:name, status:0
-  });
-  alert("申请已提交");
-  switchPage("hitter-page");
-}
-async function adminApproveWithdraw(id) {
-  const w = withdraws.find(x => x.id == id);
-  w.status = 1;
-  const h = hitters.find(x => x.account === w.hitter);
-  h.money = Math.max(0, h.money - w.amount);
-  await send("/update-withdraw", w);
-  renderAdmin();
-  alert("已通过");
-}
-
-// 刷新页面
-async function refreshHitterPage() {
-  await fetchData();
-  if (!currentHitter) return;
-  document.getElementById("walletAmount").innerText = currentHitter.money.toFixed(2);
-  const list = document.getElementById("hitterOrderList");
-  const os = orders.filter(o => o.status >=0 && o.status <=3);
-  if (os.length === 0) { list.innerHTML = '<div class="empty-tip">暂无订单</div>'; return; }
-  let html = "";
-  [...os].reverse().forEach(o => {
-    let g = ""; o.goods.forEach(i => g += i.name + "×" + i.num + "<br>");
-    let btn = "";
-    if (o.status === 0) btn = `<button class="status-btn status-accept" onclick="hitterAcceptOrder(${o.id})">接单</button>`;
-    else if (o.status ===1) btn = `<button class="status-btn status-wait" onclick="applyCompleteOrder(${o.id})">结单</button>`;
-    else if (o.status ===2) btn = `<button class="status-btn status-pending" disabled>待审核</button>`;
-    else if (o.status ===3) btn = `<button class="status-btn status-done" disabled>已完成</button>`;
-    html += `<div class="order-item"><div>玩家：${o.userId}</div><div>${g}</div><div class="order-opt">${btn}</div></div>`;
-  });
-  list.innerHTML = html;
-}
-
-async function renderService() {
-  await fetchData();
+// 刷新客服页面
+function renderService() {
+  loadOrders();
   const list = document.getElementById("serviceOrderList");
-  const pen = orders.filter(o => o.status === -1);
-  if (pen.length === 0) {
-    list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>'; return;
+  const pend = orders.filter(o => o.status === -1);
+  if (pend.length === 0) {
+    list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>';
+    return;
   }
   let html = "";
-  pen.forEach(o => {
-    let g = ""; o.goods.forEach(i => g += i.name+"×"+i.num+" ");
+  pend.forEach(o => {
+    let g = "";
+    o.goods.forEach(i => g += i.name + "×" + i.num + " ");
     html += `
     <div class="order-item">
-      <div>ID：${o.userId}</div>
-      <div>${g}</div>
-      <img src="${o.payPhoto}" class="photo-preview">
+      <div>玩家：${o.userId}</div>
+      <div>商品：${g}</div>
+      <div>金额：¥${o.total.toFixed(2)}</div>
+      <div>时间：${o.time}</div>
+      <img src="${o.payPhoto}" style="width:100%;border-radius:10px;margin:10px 0">
       <div class="order-opt">
-        <button class="status-btn status-accept" onclick="servicePass(${o.id})">通过</button>
-        <button class="status-btn status-reject" onclick="serviceReject(${o.id})">拒绝</button>
+        <button class="status-btn status-accept" onclick="passOrder(${o.id})">通过</button>
+        <button class="status-btn status-reject" onclick="rejectOrder(${o.id})">拒绝</button>
       </div>
     </div>`;
   });
   list.innerHTML = html;
 }
 
-async function renderAdmin() {
-  await fetchData();
-  const ord = document.getElementById("adminOrderList");
-  const penOrd = orders.filter(o => o.status ===2);
-  let h = "";
-  penOrd.forEach(o => {
-    h += `<div class="order-item"><div>ID：${o.userId}</div><img src="${o.proofPhoto}" class="photo-preview"><button onclick="adminApproveOrder(${o.id})" class="status-btn status-accept">通过</button></div>`;
-  });
-  ord.innerHTML = h || '<div class="empty-tip">暂无</div>';
+// 客服通过
+function passOrder(id) {
+  const o = orders.find(x => x.id === id);
+  if (o) o.status = 0;
+  saveOrders();
+  renderService();
+}
+// 客服拒绝
+function rejectOrder(id) {
+  const o = orders.find(x => x.id === id);
+  if (o) o.status = -2;
+  saveOrders();
+  renderService();
+}
 
-  const rj = document.getElementById("adminRejectList");
-  const prj = rejects.filter(x => x.status ===0);
-  let rhtml = "";
-  prj.forEach(x => {
-    rhtml += `<div class="order-item"><div>ID：${x.userId}</div><div class="reject-reason">${x.reason}</div><img src="${x.payPhoto}" class="photo-preview"><button class="status-btn status-reject" onclick="adminRejectPass(${x.id})">确认拒绝</button></div>`;
+// 打手页面
+function refreshHitterPage() {
+  loadOrders();
+  const list = document.getElementById("hitterOrderList");
+  const my = orders.filter(o => o.status === 0);
+  if (my.length === 0) {
+    list.innerHTML = '<div class="empty-tip">暂无可接单</div>';
+    return;
+  }
+  let html = "";
+  my.forEach(o => {
+    let g = ""; o.goods.forEach(i => g += i.name + "×" + i.num + "<br>");
+    html += `
+    <div class="order-item">
+      <div>玩家：${o.userId}</div>
+      <div>${g}</div>
+      <div>¥${o.total.toFixed(2)}</div>
+      <button class="status-btn status-accept" onclick="takeOrder(${o.id})">接单</button>
+    </div>`;
   });
-  rj.innerHTML = rhtml || '<div class="empty-tip">暂无</div>';
+  list.innerHTML = html;
+}
 
-  const wd = document.getElementById("adminWithdrawList");
-  const pwd = withdraws.filter(w => w.status ===0);
-  let whtml = "";
-  pwd.forEach(w => {
-    whtml += `<div class="withdraw-item"><div>打手：${w.hitter}  ¥${w.amount}</div><button onclick="adminApproveWithdraw(${w.id})" class="status-btn status-accept">通过</button></div>`;
-  });
-  wd.innerHTML = whtml || '<div class="empty-tip">暂无</div>';
+// 接单
+function takeOrder(id) {
+  const o = orders.find(x => x.id === id);
+  if (o) o.status = 1;
+  saveOrders();
+  refreshHitterPage();
 }
 </script>
 </body>
 </html>
+
