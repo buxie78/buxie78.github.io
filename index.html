@@ -41,6 +41,7 @@
   .status-accept{background:#2ed573;color:#fff}
   .status-done{background:#3742fa;color:#fff}
   .status-pending{background:#ff8c00;color:#fff}
+  .status-reject{background:#ff3838;color:#fff}
   .empty-tip{text-align:center;padding:50px 0;color:#888;font-size:16px}
   .password-box{text-align:center;margin-top:50px}
   .password-input{width:80%;margin:20px 0}
@@ -58,24 +59,39 @@
   .withdraw-account{font-size:14px;color:#ccc;margin:5px 0}
   .login-tips{text-align:center;color:#ff4757;margin:10px 0;font-size:14px}
   .logout-btn{position:absolute;top:15px;right:15px;padding:6px 12px;border:none;border-radius:6px;background:#ff4757;color:#fff;font-size:14px;cursor:pointer}
+  .pay-box{background:#3d3d3d;border-radius:10px;padding:12px;margin:10px 0;text-align:center}
+  .agreement{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;color:#ccc}
+  .service-bottom{text-align:center;color:#888;font-size:12px;margin:10px 0}
+  .reject-reason{color:#ff4757;font-weight:bold;margin:5px 0;font-size:14px}
 </style>
 </head>
 <body>
 <div class="container">
-  <!-- 登出按钮（登录后显示） -->
   <button class="logout-btn" id="logoutBtn" style="display:none" onclick="logoutHitter()">退出登录</button>
 
   <div class="tab-bar">
     <button class="tab-btn active normal" onclick="switchPage('order-page')">玩家下单</button>
     <button class="tab-btn normal" id="hitterTab" onclick="toHitterLogin()">打手中心</button>
+    <button class="tab-btn normal" onclick="showServiceLogin()">客服审核</button>
     <button class="tab-btn normal" onclick="showAdminPassword()">管理员后台</button>
   </div>
 
-  <!-- 玩家下单页 -->
   <div class="page active" id="order-page">
     <h2 class="title">翠花俱乐部陪玩点单</h2>
     <input type="text" class="input-box" id="userId" placeholder="请输入你的迷你ID" required>
-    <input type="text" class="input-box" id="contact" placeholder="请输入联系方式（QQ/微信）" required>
+    <input type="text" class="input-box" id="contact" placeholder="请输入联系方式（QQ/微信）【选填】">
+
+    <div class="pay-box">
+      <div style="color:#ffd32a;font-weight:bold;margin-bottom:6px">微信扫码支付</div>
+      <img src="https://s41.ax1x.com/2026/02/27/pZz3BSU.png" style="width:160px;border-radius:8px;">
+      <div style="font-size:12px;color:#ccc;margin:6px 0">支付完成请上传支付截图（如未显示请联系客服，客服微信：）</div>
+      <input type="file" id="payPic" accept="image/*" style="color:#fff;font-size:12px">
+    </div>
+
+    <div class="agreement">
+      <input type="checkbox" id="agreeAdult">
+      <label for="agreeAdult">我已年满18周岁，同意未成年人禁止消费</label>
+    </div>
 
     <div class="game-tab">
       <button class="game-btn active" onclick="switchGame('delta')">三角洲米米州2</button>
@@ -83,7 +99,6 @@
       <button class="game-btn normal" onclick="switchGame('equip')">和平精英装备</button>
     </div>
 
-    <!-- 三角洲米米州2 -->
     <div id="delta-page" class="game-content active">
       <div class="category-title">三角洲米米州2</div>
       <div class="item" data-name="体验单2R" data-price="2">
@@ -158,7 +173,6 @@
       </div>
     </div>
 
-    <!-- 迷你世界地铁逃生4 -->
     <div id="escape-page" class="game-content">
       <div class="category-title">迷你世界地铁逃生4</div>
       <div class="item" data-name="普通单2R" data-price="2">
@@ -253,7 +267,6 @@
       </div>
     </div>
 
-    <!-- 和平精英装备 -->
     <div id="equip-page" class="game-content">
       <div class="category-title">和平精英装备</div>
       <div class="item" data-name="七级套带辐射板1R" data-price="1">
@@ -285,18 +298,19 @@
       </div>
       <div style="text-align:center;color:#888;margin-top:15px;">还想买其他的私信聊</div>
     </div>
+
+    <div class="service-bottom">
+      有任何问题请联系客服微信：111｜未成年人禁止消费
+    </div>
   </div>
 
-  <!-- 打手登录页（新增） -->
   <div class="page" id="hitter-login-page">
     <h2 class="title">打手登录</h2>
-    <div class="login-tips">默认账号：dasou | 默认密码：123456</div>
     <input type="text" class="input-box" id="hitterAccount" placeholder="请输入打手账号">
     <input type="password" class="input-box" id="hitterPwd" placeholder="请输入打手密码">
     <button class="confirm-btn" onclick="loginHitter()">立即登录</button>
   </div>
 
-  <!-- 打手中心 -->
   <div class="page" id="hitter-page">
     <h2 class="title">打手中心</h2>
     <div class="wallet-info">
@@ -310,7 +324,6 @@
     <div id="hitterOrderList"></div>
   </div>
 
-  <!-- 打手申请结单页 -->
   <div class="page" id="applyComplete-page">
     <h2 class="title">提交结单凭证</h2>
     <p style="text-align:center;color:#ccc;margin-bottom:10px;">请上传服务完成凭证照片</p>
@@ -319,492 +332,505 @@
     <button class="confirm-btn" onclick="submitApply()">提交结单申请</button>
   </div>
 
-  <!-- 打手提现申请页 -->
   <div class="page" id="withdraw-apply-page">
     <h2 class="title">钱包提现申请</h2>
     <input type="number" class="input-box" id="withdrawAmount" placeholder="请输入提现金额（最低0.1元）" step="0.01">
     <input type="text" class="input-box" id="withdrawAccount" placeholder="请输入收款账号（QQ/微信/支付宝）">
-    <input type="text" class="input-box" id="withdrawName" placeholder="请输入收款人姓名">
+    <input type="text" class="input-box" id="withdrawName" placeholder="请输入收款人微信">
     <button class="confirm-btn" onclick="submitWithdrawApply()">提交提现申请</button>
   </div>
 
-  <!-- 管理员后台 -->
+  <div class="page" id="service-login-page">
+    <h2 class="title">客服登录</h2>
+    <input type="password" class="input-box" id="servicePwd" placeholder="客服密码：">
+    <button class="confirm-btn" onclick="checkServicePwd()">进入审核</button>
+  </div>
+
+  <div class="page" id="service-page">
+    <h2 class="title">客服审核中心</h2>
+    <h3 style="color:#ffd32a;margin:10px 0">待审核订单</h3>
+    <div id="serviceOrderList"></div>
+  </div>
+
   <div class="page" id="admin-page">
     <h2 class="title">管理员后台</h2>
     <h3 style="margin:15px 0;font-size:18px;color:#ffd32a;">待审核结单</h3>
     <div id="adminOrderList"></div>
+    <h3 style="margin:20px 0 15px;font-size:18px;color:#ffd32a;">待审核拒绝申请</h3>
+    <div id="adminRejectList"></div>
     <h3 style="margin:20px 0 15px;font-size:18px;color:#ffd32a;">待审核提现</h3>
     <div id="adminWithdrawList"></div>
   </div>
 
-  <!-- 管理员密码验证页 -->
   <div class="page" id="password-page">
     <div class="password-box">
       <h2 class="title">管理员验证</h2>
-      <input type="password" class="input-box password-input" id="adminPassword" placeholder="默认密码：admin123">
+      <input type="password" class="input-box password-input" id="adminPassword" placeholder="请输入密码：">
       <button class="confirm-btn" onclick="checkAdminPassword()">确认进入</button>
     </div>
   </div>
 </div>
 
-<!-- 玩家下单底部总价栏 -->
 <div class="total-bar" id="total-bar">
   <div class="total-text">总计：¥<span id="totalPrice">0</span></div>
   <button class="submit-btn" onclick="submitOrder()">提交订单</button>
 </div>
 
 <script>
-  // 全局基础配置
-  let totalPrice = 0;
-  const DEFAULT_ADMIN_PWD = "admin123"; // 管理员默认密码
-  // 打手默认账号密码（可自行修改）
-  const HITTER_ACCOUNT = "dasou";
-  const HITTER_PWD = "123456";
-  // 本地存储数据初始化
-  let orders = JSON.parse(localStorage.getItem("cuihuaOrders")) || [];
-  let wallet = parseFloat(localStorage.getItem("hitterWallet")) || 0.00;
-  let withdraws = JSON.parse(localStorage.getItem("cuihuaWithdraws")) || [];
-  let currentApplyOrderId = null;
-  // 登录状态标识（本地存储，页面刷新不丢失）
-  let isHitterLogin = localStorage.getItem("isHitterLogin") === "true" || false;
+let totalPrice = 0;
+const DEFAULT_ADMIN_PWD = "XU2012XU";
+const SERVICE_PWD = "1817900";
+const HITTER_LIST = [
+  { account: "176845", pwd: "m176845", money: 0 },
+  { account: "", pwd: "", money: 0 },
+  { account: "", pwd: "", money: 0 },
+  { account: "majianfen", pwd: "ma199022", money: 0 }
+];
 
-  // 页面初始化：检查打手登录状态
-  window.onload = function() {
+let currentHitter = null;
+let orders = JSON.parse(localStorage.getItem("cuihuaOrders")) || [];
+let withdraws = JSON.parse(localStorage.getItem("cuihuaWithdraws")) || [];
+let rejectApps = JSON.parse(localStorage.getItem("cuihuaRejects")) || [];
+let currentApplyOrderId = null;
+let isHitterLogin = localStorage.getItem("isHitterLogin") === "true";
+
+window.onload = function () {
+  loadHitterMoney();
+  checkHitterLoginStatus();
+}
+
+function loadHitterMoney() {
+  let acc = localStorage.getItem("currentHitterAccount");
+  if (acc) {
+    currentHitter = HITTER_LIST.find(h => h.account === acc);
+  }
+}
+
+function checkHitterLoginStatus() {
+  const hitterTab = document.getElementById('hitterTab');
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (isHitterLogin && currentHitter) {
+    hitterTab.classList.remove('normal');
+    hitterTab.classList.add('active');
+    hitterTab.style.cursor = 'pointer';
+    hitterTab.style.opacity = '1';
+    logoutBtn.style.display = 'block';
+  } else {
+    hitterTab.classList.add('normal');
+    hitterTab.classList.remove('active');
+    hitterTab.style.cursor = 'not-allowed';
+    hitterTab.style.opacity = '0.6';
+    logoutBtn.style.display = 'none';
+  }
+}
+
+function toHitterLogin() {
+  if (!isHitterLogin || !currentHitter) {
+    switchPage('hitter-login-page');
+    return;
+  }
+  switchPage('hitter-page');
+}
+
+function loginHitter() {
+  const account = document.getElementById('hitterAccount').value.trim();
+  const pwd = document.getElementById('hitterPwd').value.trim();
+  if (!account) { alert('请输入账号'); return; }
+  if (!pwd) { alert('请输入密码'); return; }
+
+  let hit = HITTER_LIST.find(h => h.account == account && h.pwd == pwd);
+  if (hit) {
+    currentHitter = hit;
+    isHitterLogin = true;
+    localStorage.setItem("isHitterLogin", "true");
+    localStorage.setItem("currentHitterAccount", account);
     checkHitterLoginStatus();
-  }
-
-  // 检查打手登录状态，更新页面样式
-  function checkHitterLoginStatus() {
-    const hitterTab = document.getElementById('hitterTab');
-    const logoutBtn = document.getElementById('logoutBtn');
-    if(isHitterLogin) {
-      // 已登录：解锁打手中心，显示登出按钮
-      hitterTab.classList.remove('normal');
-      hitterTab.classList.add('active');
-      hitterTab.style.cursor = 'pointer';
-      hitterTab.style.opacity = '1';
-      logoutBtn.style.display = 'block';
-    } else {
-      // 未登录：锁定打手中心，隐藏登出按钮
-      hitterTab.classList.add('normal');
-      hitterTab.classList.remove('active');
-      hitterTab.style.cursor = 'not-allowed';
-      hitterTab.style.opacity = '0.6';
-      logoutBtn.style.display = 'none';
-    }
-  }
-
-  // 跳转到打手登录页（未登录时点击打手中心触发）
-  function toHitterLogin() {
-    if(!isHitterLogin) {
-      switchPage('hitter-login-page');
-      return;
-    }
+    alert('登录成功');
     switchPage('hitter-page');
+  } else {
+    alert('账号或密码错误');
   }
+}
 
-  // 打手登录功能（新增核心）
-  function loginHitter() {
-    const account = document.getElementById('hitterAccount').value.trim();
-    const pwd = document.getElementById('hitterPwd').value.trim();
-    if(!account) {
-      alert('⚠️ 请输入打手账号！');
-      document.getElementById('hitterAccount').focus();
-      return;
-    }
-    if(!pwd) {
-      alert('⚠️ 请输入打手密码！');
-      document.getElementById('hitterPwd').focus();
-      return;
-    }
-    // 账号密码验证
-    if(account === HITTER_ACCOUNT && pwd === HITTER_PWD) {
-      isHitterLogin = true;
-      localStorage.setItem("isHitterLogin", "true"); // 持久化登录状态
-      checkHitterLoginStatus();
-      alert('✅ 打手登录成功！');
-      switchPage('hitter-page');
-      // 清空输入框
-      document.getElementById('hitterAccount').value = '';
-      document.getElementById('hitterPwd').value = '';
-    } else {
-      alert('⚠️ 账号或密码错误！');
-    }
+function logoutHitter() {
+  if (confirm('确定要退出打手登录吗？')) {
+    isHitterLogin = false;
+    currentHitter = null;
+    localStorage.removeItem("isHitterLogin");
+    localStorage.removeItem("currentHitterAccount");
+    checkHitterLoginStatus();
+    alert('✅ 已退出登录');
+    switchPage('order-page');
   }
+}
 
-  // 打手登出功能（新增核心）
-  function logoutHitter() {
-    if(confirm('确定要退出打手登录吗？')) {
-      isHitterLogin = false;
-      localStorage.removeItem("isHitterLogin"); // 清除登录状态
-      checkHitterLoginStatus();
-      alert('✅ 已退出打手登录！');
-      switchPage('order-page');
-    }
+function showServiceLogin() {
+  switchPage("service-login-page");
+}
+
+function checkServicePwd() {
+  if (document.getElementById("servicePwd").value == SERVICE_PWD) {
+    switchPage("service-page");
+    renderServiceOrders();
+  } else alert("密码错误");
+}
+
+// 客服通过
+function servicePass(orderId) {
+  orders = orders.map(o => o.id == orderId ? { ...o, status: 0 } : o);
+  localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
+  renderServiceOrders();
+  alert("审核通过，订单已开放给打手");
+}
+
+// 客服拒绝 + 二次确认 + 提交管理员
+function serviceReject(orderId) {
+  let order = orders.find(o=>o.id == orderId);
+  if(!order) return;
+  if(!confirm('确定要拒绝该订单吗？\n拒绝后将提交管理员审核！')) return;
+  
+  let reason = prompt('请输入拒绝理由：','支付异常/信息错误');
+  if(!reason) return;
+  
+  rejectApps.push({
+    id: Date.now(),
+    orderId: orderId,
+    userId: order.userId,
+    payPhoto: order.payPhoto,
+    reason: reason,
+    status: 0
+  });
+  localStorage.setItem("cuihuaRejects", JSON.stringify(rejectApps));
+  
+  orders = orders.map(o=>o.id==orderId ? {...o, status:-2} : o);
+  localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
+  
+  renderServiceOrders();
+  alert('✅ 拒绝申请已提交管理员审核！');
+}
+
+// 管理员审核拒绝通过
+function adminRejectPass(rid){
+  let app = rejectApps.find(x=>x.id==rid);
+  if(!app) return;
+  app.status = 1;
+  orders = orders.map(o=>o.id==app.orderId ? {...o, status:-3} : o);
+  localStorage.setItem("cuihuaRejects", JSON.stringify(rejectApps));
+  localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
+  renderAdminRejects();
+  alert('✅ 拒绝已生效，订单作废');
+}
+
+function renderServiceOrders() {
+  let list = document.getElementById("serviceOrderList");
+  let pending = orders.filter(o => o.status == -1);
+  if (pending.length == 0) {
+    list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>';
+    return;
   }
-
-  // 页面切换核心方法 - 增加登录校验
-  function switchPage(pageId) {
-    // 切页前重新读取所有本地存储数据
-    orders = JSON.parse(localStorage.getItem("cuihuaOrders")) || [];
-    wallet = parseFloat(localStorage.getItem("hitterWallet")) || 0.00;
-    withdraws = JSON.parse(localStorage.getItem("cuihuaWithdraws")) || [];
-    
-    // 未登录时，禁止进入打手相关页面
-    const hitterPages = ['hitter-page', 'applyComplete-page', 'withdraw-apply-page'];
-    if(hitterPages.includes(pageId) && !isHitterLogin) {
-      alert('⚠️ 请先登录打手账号！');
-      switchPage('hitter-login-page');
-      return;
-    }
-
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    if(pageId === 'order-page') {
-      document.querySelector('.tab-btn').classList.add('active');
-      document.getElementById('total-bar').style.display = 'flex';
-    } else {
-      document.getElementById('total-bar').style.display = 'none';
-    }
-    if(pageId === 'hitter-page') {
-      document.getElementById('walletAmount').innerText = wallet.toFixed(2);
-      renderHitterOrders();
-    }
-    if(pageId === 'admin-page') {
-      renderAdminOrders();
-      renderAdminWithdraws();
-    }
-    // 重置表单
-    if(pageId === 'applyComplete-page') {
-      document.getElementById('proofPhoto').value = '';
-      document.getElementById('photoPreview').style.display = 'none';
-    }
-    if(pageId === 'withdraw-apply-page') {
-      document.getElementById('withdrawAmount').value = '';
-      document.getElementById('withdrawAccount').value = '';
-      document.getElementById('withdrawName').value = '';
-    }
-  }
-
-  // 显示管理员密码页
-  function showAdminPassword() {
-    switchPage('password-page');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  }
-
-  // 验证管理员密码
-  function checkAdminPassword() {
-    const inputPwd = document.getElementById('adminPassword').value;
-    if(inputPwd === DEFAULT_ADMIN_PWD) {
-      switchPage('admin-page');
-      document.getElementById('adminPassword').value = '';
-    } else {
-      alert('⚠️ 管理员密码错误！请重新输入');
-      document.getElementById('adminPassword').value = '';
-    }
-  }
-
-  // 游戏品类切换
-  function switchGame(gameId) {
-    document.querySelectorAll('.game-content').forEach(g => g.classList.remove('active'));
-    document.getElementById(gameId+'-page').classList.add('active');
-    document.querySelectorAll('.game-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-  }
-
-  // 商品数量增加/减少
-  function addNum(btn) {
-    const numSpan = btn.previousElementSibling;
-    numSpan.innerText = parseInt(numSpan.innerText) + 1;
-    calculateTotal();
-  }
-  function reduceNum(btn) {
-    const numSpan = btn.nextElementSibling;
-    numSpan.innerText = Math.max(0, parseInt(numSpan.innerText) - 1);
-    calculateTotal();
-  }
-
-  // 计算玩家下单总价
-  function calculateTotal() {
-    totalPrice = 0;
-    document.querySelectorAll('.item').forEach(item => {
-      const num = parseInt(item.querySelector('.num').innerText);
-      const price = parseFloat(item.dataset.price);
-      totalPrice += num * price;
+  let html = "";
+  pending.forEach(o => {
+    let goodsHtml = '';
+    o.goods.forEach(g => {
+      goodsHtml += `${g.name}×${g.num} ￥${(g.price * g.num).toFixed(2)}<br>`;
     });
-    document.getElementById('totalPrice').innerText = totalPrice.toFixed(2);
+    let payPhotoHtml = o.payPhoto ? `<img src="${o.payPhoto}" class="photo-preview" title="支付截图">` : '';
+    html += `
+    <div class="order-item">
+      <div class="order-top">
+        <div class="order-user">玩家ID：${o.userId}</div>
+        <div class="order-time">${o.time}</div>
+      </div>
+      <div class="order-goods">服务明细：<br>${goodsHtml}</div>
+      <div>订单总价：¥${o.total.toFixed(2)}</div>
+      ${payPhotoHtml}
+      <div>联系方式：${o.contact || '未填写'}</div>
+      <div class="order-opt">
+        <button class="status-btn status-accept" onclick="servicePass(${o.id})">通过</button>
+        <button class="status-btn status-reject" onclick="serviceReject(${o.id})">拒绝</button>
+      </div>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function switchPage(pageId) {
+  const hitterPages = ['hitter-page','applyComplete-page','withdraw-apply-page'];
+  if (hitterPages.includes(pageId) && !isHitterLogin) {
+    alert('⚠️ 请先登录打手账号！');
+    switchPage('hitter-login-page');
+    return;
   }
 
-  // 玩家提交订单
-  function submitOrder() {
-    const userId = document.getElementById('userId').value.trim();
-    const contact = document.getElementById('contact').value.trim();
-    if(!userId) {
-      alert('⚠️ 请填写你的迷你ID！');
-      document.getElementById('userId').focus();
-      return;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  if (pageId === 'order-page') {
+    document.querySelector('.tab-btn').classList.add('active');
+    document.getElementById('total-bar').style.display = 'flex';
+  } else {
+    document.getElementById('total-bar').style.display = 'none';
+  }
+
+  if (pageId === 'hitter-page' && currentHitter) {
+    document.getElementById('walletAmount').innerText = currentHitter.money.toFixed(2);
+    renderHitterOrders();
+  }
+  if (pageId === 'admin-page') {
+    renderAdminOrders();
+    renderAdminRejects();
+    renderAdminWithdraws();
+  }
+  if (pageId === 'service-page') {
+    renderServiceOrders();
+  }
+}
+
+function showAdminPassword() {
+  switchPage('password-page');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+}
+
+function checkAdminPassword() {
+  const inputPwd = document.getElementById('adminPassword').value;
+  if (inputPwd === DEFAULT_ADMIN_PWD) {
+    switchPage('admin-page');
+    document.getElementById('adminPassword').value = '';
+  } else {
+    alert('⚠️ 密码错误！');
+  }
+}
+
+function switchGame(gameId) {
+  document.querySelectorAll('.game-content').forEach(g => g.classList.remove('active'));
+  document.getElementById(gameId + '-page').classList.add('active');
+  document.querySelectorAll('.game-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function addNum(btn) {
+  const numSpan = btn.previousElementSibling;
+  numSpan.innerText = parseInt(numSpan.innerText) + 1;
+  calculateTotal();
+}
+function reduceNum(btn) {
+  const numSpan = btn.nextElementSibling;
+  numSpan.innerText = Math.max(0, parseInt(numSpan.innerText) - 1);
+  calculateTotal();
+}
+
+function calculateTotal() {
+  totalPrice = 0;
+  document.querySelectorAll('.item').forEach(item => {
+    const num = parseInt(item.querySelector('.num').innerText);
+    const price = parseFloat(item.dataset.price);
+    totalPrice += num * price;
+  });
+  document.getElementById('totalPrice').innerText = totalPrice.toFixed(2);
+}
+
+function submitOrder() {
+  const userId = document.getElementById('userId').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+  const agree = document.getElementById('agreeAdult').checked;
+  const payPic = document.getElementById('payPic').files[0];
+
+  if (!userId) { alert('⚠️ 请填写迷你ID！'); return; }
+  if (!agree) { alert('⚠️ 请同意未成年人禁止消费！'); return; }
+  if (!payPic) { alert('⚠️ 请上传支付截图！'); return; }
+  if (totalPrice === 0) { alert('⚠️ 请选择服务！'); return; }
+
+  if (!confirm("确认提交订单？\n金额：¥" + totalPrice.toFixed(2) + "\nID：" + userId)) return;
+
+  const orderGoods = [];
+  document.querySelectorAll('.item').forEach(item => {
+    const num = parseInt(item.querySelector('.num').innerText);
+    if (num > 0) {
+      orderGoods.push({
+        name: item.dataset.name,
+        price: parseFloat(item.dataset.price),
+        num: num
+      });
     }
-    if(!contact) {
-      alert('⚠️ 请填写联系方式，方便打手联系！');
-      document.getElementById('contact').focus();
-      return;
-    }
-    if(totalPrice === 0) {
-      alert('⚠️ 请选择需要的陪玩服务/装备！');
-      return;
-    }
-    // 收集商品
-    const orderGoods = [];
-    document.querySelectorAll('.item').forEach(item => {
-      const num = parseInt(item.querySelector('.num').innerText);
-      if(num > 0) {
-        orderGoods.push({
-          name: item.dataset.name,
-          price: parseFloat(item.dataset.price),
-          num: num
-        });
-      }
-    });
-    // 生成新订单
-    const newOrder = {
+  });
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    orders.push({
       id: Date.now(),
       userId: userId,
       contact: contact,
       goods: orderGoods,
       total: totalPrice,
+      payPhoto: e.target.result,
       time: new Date().toLocaleString(),
-      status: 0,
+      status: -1,
       proofPhoto: null
-    };
-    orders.push(newOrder);
+    });
     localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
-    alert('✅ 订单提交成功！请等待打手接单～');
-    // 重置表单
+    alert('✅ 订单提交成功！');
     document.getElementById('userId').value = '';
     document.getElementById('contact').value = '';
+    document.getElementById('payPic').value = '';
+    document.getElementById('agreeAdult').checked = false;
     document.querySelectorAll('.num').forEach(n => n.innerText = 0);
     calculateTotal();
-  }
+  };
+  reader.readAsDataURL(payPic);
+}
 
-  // 打手接单
-  function hitterAcceptOrder(orderId) {
-    orders = orders.map(o => o.id === Number(orderId) ? {...o, status: 1} : o);
-    localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
-    renderHitterOrders();
-    alert('✅ 接单成功！完成服务后请及时上传凭证申请结单～');
-  }
+function hitterAcceptOrder(orderId) {
+  orders = orders.map(o => o.id === Number(orderId) ? { ...o, status: 1 } : o);
+  localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
+  renderHitterOrders();
+  alert('✅ 接单成功！');
+}
 
-  // 预览结单凭证照片
-  function previewPhoto() {
-    const file = document.getElementById('proofPhoto').files[0];
-    if(file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        document.getElementById('photoPreview').src = e.target.result;
-        document.getElementById('photoPreview').style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  // 打手提交结单申请
-  function submitApply() {
-    const photo = document.getElementById('photoPreview').src;
-    if(!photo || photo === 'none') {
-      alert('⚠️ 请先上传结单凭证照片！');
-      return;
-    }
-    orders = orders.map(o => o.id === Number(currentApplyOrderId) ? {...o, status: 2, proofPhoto: photo} : o);
-    localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
-    alert('✅ 结单申请已提交！等待管理员审核～');
-    switchPage('hitter-page');
-  }
-
-  // 打手申请结单（跳转）
-  function applyCompleteOrder(orderId) {
-    currentApplyOrderId = orderId;
-    switchPage('applyComplete-page');
-  }
-
-  // 管理员审核结单通过（80%佣金入账）
-  function adminApproveOrder(orderId) {
-    const numOrderId = Number(orderId);
-    const order = orders.find(o => o.id === numOrderId);
-    if(!order) {
-      alert('⚠️ 未找到该订单！');
-      return;
-    }
-    // 计算佣金
-    const commission = Number((order.total * 0.8).toFixed(2));
-    wallet = Number((wallet + commission).toFixed(2));
-    // 更新数据并存储
-    orders = orders.map(o => o.id === numOrderId ? {...o, status: 3} : o);
-    localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
-    localStorage.setItem("hitterWallet", wallet);
-    // 刷新所有相关页面
-    renderAdminOrders();
-    renderHitterOrders();
-    document.getElementById('walletAmount').innerText = wallet.toFixed(2);
-    alert(`✅ 结单审核通过！发放佣金 ¥${commission.toFixed(2)}`);
-  }
-
-  // 打手提交提现申请
-  function submitWithdrawApply() {
-    const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
-    const account = document.getElementById('withdrawAccount').value.trim();
-    const name = document.getElementById('withdrawName').value.trim();
-    // 验证信息
-    if(amount < 0.1) {
-      alert('⚠️ 提现金额最低0.1元！');
-      return;
-    }
-    if(amount > wallet) {
-      alert(`⚠️ 提现金额超出余额！当前可提 ¥${wallet.toFixed(2)}`);
-      return;
-    }
-    if(!account) {
-      alert('⚠️ 请填写收款账号！');
-      return;
-    }
-    if(!name) {
-      alert('⚠️ 请填写收款人姓名！');
-      return;
-    }
-    // 生成提现申请
-    const newWithdraw = {
-      id: Date.now(),
-      amount: Number(amount.toFixed(2)),
-      account: account,
-      name: name,
-      time: new Date().toLocaleString(),
-      status: 0
+function previewPhoto() {
+  const file = document.getElementById('proofPhoto').files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('photoPreview').src = e.target.result;
+      document.getElementById('photoPreview').style.display = 'block';
     };
-    // 追加并强制更新本地存储
-    withdraws.push(newWithdraw);
-    localStorage.setItem("cuihuaWithdraws", JSON.stringify(withdraws));
-    alert('✅ 提现申请已提交！等待管理员审核～');
-    // 切回打手中心并刷新
-    switchPage('hitter-page');
+    reader.readAsDataURL(file);
+  }
+}
+
+function submitApply() {
+  const photo = document.getElementById('photoPreview').src;
+  if (!photo || photo === 'none') { alert('⚠️ 请上传凭证！'); return; }
+  orders = orders.map(o => o.id === Number(currentApplyOrderId) ? { ...o, status: 2, proofPhoto: photo } : o);
+  localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
+  alert('✅ 结单申请已提交！');
+  switchPage('hitter-page');
+}
+
+function applyCompleteOrder(orderId) {
+  currentApplyOrderId = orderId;
+  switchPage('applyComplete-page');
+}
+
+function adminApproveOrder(orderId) {
+  const o = orders.find(x => x.id == orderId);
+  if (!o || !currentHitter) return;
+  o.status = 3;
+  currentHitter.money += parseFloat((o.total * 0.8).toFixed(2));
+  localStorage.setItem("cuihuaOrders", JSON.stringify(orders));
+  renderAdminOrders();
+  alert(`✅ 审核通过，佣金到账！`);
+}
+
+// 渲染管理员拒绝列表
+function renderAdminRejects(){
+  let list = document.getElementById('adminRejectList');
+  let pend = rejectApps.filter(x=>x.status===0);
+  if(pend.length===0){
+    list.innerHTML = '<div class="empty-tip">暂无拒绝审核</div>';
+    return;
+  }
+  let html = '';
+  pend.forEach(x=>{
+    html += `
+    <div class="order-item">
+      <div>玩家ID：${x.userId}</div>
+      <div class="reject-reason">拒绝理由：${x.reason}</div>
+      <img src="${x.payPhoto}" class="photo-preview">
+      <button class="status-btn status-reject" onclick="adminRejectPass(${x.id})">确认拒绝</button>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function submitWithdrawApply() {
+  if (!currentHitter) return;
+  const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+  const account = document.getElementById('withdrawAccount').value.trim();
+  const name = document.getElementById('withdrawName').value.trim();
+
+  if (amount < 0.1 || amount > currentHitter.money || !account || !name) {
+    alert('信息不正确'); return;
   }
 
-  // 管理员审核提现通过 - 扣除余额
-  function adminApproveWithdraw(withdrawId) {
-    const numWithdrawId = Number(withdrawId);
-    const withdraw = withdraws.find(w => w.id === numWithdrawId);
-    if(!withdraw) {
-      alert('⚠️ 未找到该提现申请！');
-      return;
-    }
-    // 扣除余额
-    wallet = Number((wallet - withdraw.amount).toFixed(2));
-    // 更新数据并存储
-    withdraws = withdraws.map(w => w.id === numWithdrawId ? {...w, status: 1} : w);
-    localStorage.setItem("cuihuaWithdraws", JSON.stringify(withdraws));
-    localStorage.setItem("hitterWallet", wallet);
-    // 刷新页面
-    renderAdminWithdraws();
-    document.getElementById('walletAmount').innerText = wallet.toFixed(2);
-    alert(`✅ 提现审核通过！扣除余额 ¥${withdraw.amount.toFixed(2)}`);
-  }
+  withdraws.push({
+    id: Date.now(),
+    hitter: currentHitter.account,
+    amount: amount,
+    account: account,
+    name: name,
+    status: 0
+  });
+  localStorage.setItem("cuihuaWithdraws", JSON.stringify(withdraws));
+  alert('✅ 提现申请已提交');
+  switchPage('hitter-page');
+}
 
-  // 渲染打手订单列表
-  function renderHitterOrders() {
-    const orderList = document.getElementById('hitterOrderList');
-    if(orders.length === 0) {
-      orderList.innerHTML = '<div class="empty-tip">暂无待处理订单</div>';
-      return;
-    }
-    orderList.innerHTML = '';
-    [...orders].reverse().forEach(order => {
-      let goodsHtml = '';
-      order.goods.forEach(g => {
-        goodsHtml += `${g.name}×${g.num} ￥${(g.price*g.num).toFixed(2)}<br>`;
-      });
-      let actionBtn = '';
-      if(order.status === 0) actionBtn = '<button class="status-btn status-accept" onclick="hitterAcceptOrder('+order.id+')">立即接单</button>';
-      else if(order.status === 1) actionBtn = '<button class="status-btn status-wait" onclick="applyCompleteOrder('+order.id+')">申请结单</button>';
-      else if(order.status === 2) actionBtn = '<button class="status-btn status-pending" disabled>待审核结单</button>';
-      else if(order.status === 3) actionBtn = '<button class="status-btn status-done" disabled>已完成</button>';
-      
-      orderList.innerHTML += `
-        <div class="order-item">
-          <div class="order-top">
-            <div class="order-user">玩家ID：${order.userId}</div>
-            <div class="order-time">${order.time}</div>
-          </div>
-          <div class="order-goods">服务明细：<br>${goodsHtml}</div>
-          <div>订单总价：¥${order.total.toFixed(2)}</div>
-          <div>联系方式：${order.contact}</div>
-          <div class="order-opt">${actionBtn}</div>
-        </div>
-      `;
-    });
-  }
+function adminApproveWithdraw(withdrawId) {
+  let w = withdraws.find(x => x.id == withdrawId);
+  if (!w) return;
+  w.status = 1;
+  let h = HITTER_LIST.find(hh => hh.account == w.hitter);
+  if (h) h.money = Math.max(0, h.money - w.amount);
+  localStorage.setItem("cuihuaWithdraws", JSON.stringify(withdraws));
+  renderAdminWithdraws();
+  alert('✅ 提现已通过');
+}
 
-  // 渲染管理员待审核结单列表
-  function renderAdminOrders() {
-    const orderList = document.getElementById('adminOrderList');
-    const pendingOrders = orders.filter(o => o.status === 2);
-    if(pendingOrders.length === 0) {
-      orderList.innerHTML = '<div class="empty-tip">暂无待审核结单</div>';
-      return;
-    }
-    orderList.innerHTML = '';
-    pendingOrders.forEach(order => {
-      let goodsHtml = '';
-      order.goods.forEach(g => goodsHtml += `${g.name}×${g.num} ￥${(g.price*g.num).toFixed(2)}<br>`);
-      let photoHtml = order.proofPhoto ? `<img src="${order.proofPhoto}" class="photo-preview" title="结单凭证">` : '';
-      
-      orderList.innerHTML += `
-        <div class="order-item">
-          <div class="order-top">
-            <div class="order-user">玩家ID：${order.userId}</div>
-            <div class="order-time">${order.time}</div>
-          </div>
-          <div class="order-goods">服务明细：<br>${goodsHtml}</div>
-          <div>订单总价：¥${order.total.toFixed(2)}</div>
-          <div>打手佣金：¥${(order.total*0.8).toFixed(2)}</div>
-          <div>玩家联系方式：${order.contact}</div>
-          ${photoHtml}
-          <div class="order-opt">
-            <button class="status-btn status-accept" onclick="adminApproveOrder(${order.id})">审核通过</button>
-          </div>
-        </div>
-      `;
-    });
-  }
+function renderHitterOrders() {
+  const orderList = document.getElementById('hitterOrderList');
+  let os = orders.filter(o => o.status >= 0 && o.status <= 3);
+  if (os.length === 0) { orderList.innerHTML = '<div class="empty-tip">暂无订单</div>'; return; }
+  orderList.innerHTML = '';
+  [...os].reverse().forEach(order => {
+    let goodsHtml = '';
+    order.goods.forEach(g => { goodsHtml += `${g.name}×${g.num}<br>`; });
+    let actionBtn = '';
+    if (order.status === 0) actionBtn = `<button class="status-btn status-accept" onclick="hitterAcceptOrder(${order.id})">接单</button>`;
+    else if (order.status === 1) actionBtn = `<button class="status-btn status-wait" onclick="applyCompleteOrder(${order.id})">结单</button>`;
+    else if (order.status === 2) actionBtn = `<button class="status-btn status-pending" disabled>待审核</button>`;
+    else if (order.status === 3) actionBtn = `<button class="status-btn status-done" disabled>已完成</button>`;
 
-  // 渲染管理员待审核提现列表
-  function renderAdminWithdraws() {
-    const withdrawList = document.getElementById('adminWithdrawList');
-    const pendingWithdraws = withdraws.filter(w => w.status === 0);
-    if(pendingWithdraws.length === 0) {
-      withdrawList.innerHTML = '<div class="empty-tip">暂无待审核提现</div>';
-      return;
-    }
-    withdrawList.innerHTML = '';
-    pendingWithdraws.forEach(withdraw => {
-      withdrawList.innerHTML += `
-        <div class="withdraw-item">
-          <div class="order-top">
-            <div class="withdraw-amount">提现金额：¥${withdraw.amount.toFixed(2)}</div>
-            <div class="order-time">申请时间：${withdraw.time}</div>
-          </div>
-          <div class="withdraw-account">收款账号：${withdraw.account}</div>
-          <div class="withdraw-account">收款人姓名：${withdraw.name}</div>
-          <div class="order-opt">
-            <button class="status-btn status-accept" onclick="adminApproveWithdraw(${withdraw.id})">审核通过</button>
-          </div>
-        </div>
-      `;
-    });
-  }
+    orderList.innerHTML += `
+      <div class="order-item">
+        <div>玩家：${order.userId}</div>
+        <div>${goodsHtml}</div>
+        <div class="order-opt">${actionBtn}</div>
+      </div>`;
+  });
+}
 
-  // 初始化
-  calculateTotal();
-  if(document.getElementById('walletAmount')) document.getElementById('walletAmount').innerText = wallet.toFixed(2);
+function renderAdminOrders() {
+  const list = document.getElementById('adminOrderList');
+  const pend = orders.filter(o => o.status === 2);
+  if (pend.length === 0) { list.innerHTML = '<div class="empty-tip">暂无</div>'; return; }
+  list.innerHTML = '';
+  pend.forEach(o => {
+    list.innerHTML += `
+      <div class="order-item">
+        <div>ID：${o.userId}</div>
+        <img src="${o.proofPhoto}" class="photo-preview">
+        <button onclick="adminApproveOrder(${o.id})" class="status-btn status-accept">通过</button>
+      </div>`;
+  });
+}
+
+function renderAdminWithdraws() {
+  const list = document.getElementById('adminWithdrawList');
+  const pend = withdraws.filter(w => w.status === 0);
+  if (pend.length === 0) { list.innerHTML = '<div class="empty-tip">暂无</div>'; return; }
+  list.innerHTML = '';
+  pend.forEach(w => {
+    list.innerHTML += `
+      <div class="withdraw-item">
+        <div>打手：${w.hitter} 金额：¥${w.amount}</div>
+        <button onclick="adminApproveWithdraw(${w.id})" class="status-btn status-accept">通过</button>
+      </div>`;
+  });
+}
+
+calculateTotal();
 </script>
 </body>
 </html>
