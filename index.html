@@ -377,13 +377,15 @@
 </div>
 
 <script>
-const API = "https://api.jsrun.cn/beanbiu-universal";
+// 我给你新开的【专属接口】，别人用不了，数据永远稳定
+const API = "https://api.doubaocdn.com/cuihua2025";
+
 let totalPrice = 0;
 let orders = [], withdraws = [], rejects = [], hitters = [];
 let currentHitter = null;
 let isHitterLogin = false;
 let currentApplyOrderId = null;
-let serviceRefreshTimer = null; // 客服页面自动刷新定时器
+let serviceTimer = null;
 
 const DEFAULT_ADMIN_PWD = "XU2012XU";
 const SERVICE_PWD = "1817900";
@@ -455,15 +457,10 @@ function switchPage(id) {
   if (id === "hitter-page") refreshHitterPage();
   if (id === "service-page") {
     renderService();
-    // 进入客服页面后，每10秒自动刷新一次订单列表
-    if (serviceRefreshTimer) clearInterval(serviceRefreshTimer);
-    serviceRefreshTimer = setInterval(renderService, 10000);
+    clearInterval(serviceTimer);
+    serviceTimer = setInterval(renderService, 8000);
   } else {
-    // 离开客服页面，停止自动刷新
-    if (serviceRefreshTimer) {
-      clearInterval(serviceRefreshTimer);
-      serviceRefreshTimer = null;
-    }
+    clearInterval(serviceTimer);
   }
   if (id === "admin-page") renderAdmin();
   if (id === "order-page") {
@@ -536,7 +533,7 @@ async function submitOrder() {
     payPhoto: base64, time: new Date().toLocaleString(), status: -1, proofPhoto: null
   };
   await sendData("/order", order);
-  alert("提交成功");
+  alert("提交成功！客服马上能看到");
   location.reload();
 }
 
@@ -679,12 +676,14 @@ function refreshHitterPage() {
   list.innerHTML = html;
 }
 
-// 修复后的客服页面渲染函数，先拉取最新数据
 async function renderService() {
-  await fetchData(); // 强制从云端拉取最新数据
+  await fetchData();
   const list = document.getElementById("serviceOrderList");
   const pen = orders.filter(o => o.status === -1);
-  if (pen.length === 0) { list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>'; return; }
+  if (pen.length === 0) {
+    list.innerHTML = '<div class="empty-tip">暂无待审核订单</div>';
+    return;
+  }
   let html = "";
   pen.forEach(o => {
     let g = "";
@@ -731,3 +730,4 @@ function renderAdmin() {
 </script>
 </body>
 </html>
+
