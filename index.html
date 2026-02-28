@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>翠花俱乐部陪玩点单系统【GitHub云端版】</title>
+<title>翠花俱乐部陪玩点单系统【GitHub云端互通版】</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
   body{background:#1a1a1a;color:#fff;padding:10px}
@@ -101,10 +101,10 @@
 
     <div id="delta-page" class="game-content active">
       <div class="category-title">三角洲米米州2</div>
-      <div class="item" data-name="联系客服" data-price="7891">
-        <div class="item-name">联系客服（请别下单） </div>
-        <div class="item-desc">客服VGTA790836hyh（注明来意）</div>
-        <div class="item-price">¥7891</div>
+      <div class="item" data-name="体验单2R" data-price="2">
+        <div class="item-name">体验单 2R</div>
+        <div class="item-desc">保底100W 送1套6级</div>
+        <div class="item-price">¥2</div>
         <div class="item-opt">
           <button class="opt-btn" onclick="reduceNum(this)">-</button>
           <span class="num">0</span>
@@ -332,11 +332,11 @@
 
   <div class="page" id="admin-page">
     <h2 class="title">管理员后台</h2>
-    <h3>待审核结单</h3>
+    <h3 style="margin:15px 0;font-size:18px;color:#ffd32a;">待审核结单</h3>
     <div id="adminOrderList"></div>
-    <h3>待审核拒绝</h3>
+    <h3 style="margin:20px 0 15px;font-size:18px;color:#ffd32a;">待审核拒绝申请</h3>
     <div id="adminRejectList"></div>
-    <h3>待审核提现</h3>
+    <h3 style="margin:20px 0 15px;font-size:18px;color:#ffd32a;">待审核提现</h3>
     <div id="adminWithdrawList"></div>
   </div>
 
@@ -355,9 +355,13 @@
 </div>
 
 <script>
-const DATA_URL = "https://raw.githubusercontent.com/buxie78/buxie78.github.io/main/data.json";
-const UPLOAD_URL = "https://buxie78.github.io/buxie78.github.io/save.php";
+// 核心配置（已适配你的GitHub信息，仅需替换Token）
+const GITHUB_USER = "buxie78";
+const GITHUB_REPO = "buxie78.github.io";
+const DATA_FILE_PATH = "data.json";
+const GITHUB_TOKEN = "你的GitHubToken"; // 替换为你生成的私人令牌
 
+// 初始数据结构
 let cloudData = {
   orders: [],
   withdraws: [],
@@ -376,22 +380,70 @@ let currentApplyOrderId = null;
 const DEFAULT_ADMIN_PWD = "XU2012XU";
 const SERVICE_PWD = "1817900";
 
+// 【核心云端交互函数】读取GitHub数据
 async function loadCloudData() {
   try {
-    let res = await fetch(DATA_URL);
-    if (res.ok) cloudData = await res.json();
-  } catch(e) {}
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`);
+    if (response.ok) {
+      const data = await response.json();
+      const content = atob(data.content);
+      cloudData = JSON.parse(content);
+      console.log("云端数据加载成功");
+    } else if (response.status === 404) {
+      // 首次无文件时，创建初始数据文件
+      await saveCloudData();
+      console.log("首次创建云端数据文件成功");
+    }
+  } catch (e) {
+    console.error("加载云端数据失败，使用本地缓存", e);
+  }
 }
 
+// 【核心云端交互函数】写入GitHub数据
 async function saveCloudData() {
   try {
-    await fetch(UPLOAD_URL, {
-      method: "POST",
-      body: JSON.stringify(cloudData)
+    // 先获取文件SHA（用于更新），无则为undefined
+    let sha = null;
+    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`);
+    if (getRes.ok) {
+      const fileData = await getRes.json();
+      sha = fileData.sha;
+    }
+
+    // 编码数据
+    const content = btoa(JSON.stringify(cloudData, null, 2));
+
+    // 发起更新请求
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "自动同步俱乐部运营数据",
+        content: content,
+        sha: sha
+      })
     });
-  } catch(e) {}
+
+    if (response.ok) {
+      console.log("数据已成功同步到GitHub云端");
+      return true;
+    } else {
+      const err = await response.json();
+      console.error("云端保存失败", err);
+      alert("数据同步失败，请检查Token权限或网络！");
+      return false;
+    }
+  } catch (e) {
+    console.error("保存云端数据异常", e);
+    alert("数据同步异常，请稍后重试！");
+    return false;
+  }
 }
 
+// 辅助函数：文件转Base64
 function fileToBase64(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -400,278 +452,508 @@ function fileToBase64(file) {
   });
 }
 
+// 数量增减与总价计算
 function addNum(btn) {
-  let num = btn.previousElementSibling;
-  num.innerText = +num.innerText + 1;
+  const numSpan = btn.previousElementSibling;
+  numSpan.innerText = Math.max(0, parseInt(numSpan.innerText) + 1);
   calculateTotal();
 }
 
 function reduceNum(btn) {
-  let num = btn.nextElementSibling;
-  num.innerText = Math.max(0, +num.innerText - 1);
+  const numSpan = btn.nextElementSibling;
+  numSpan.innerText = Math.max(0, parseInt(numSpan.innerText) - 1);
   calculateTotal();
 }
 
 function calculateTotal() {
   totalPrice = 0;
-  document.querySelectorAll(".item").forEach(i => {
-    totalPrice += +i.dataset.price * +i.querySelector(".num").innerText;
+  document.querySelectorAll(".item").forEach(item => {
+    const num = parseInt(item.querySelector(".num").innerText);
+    const price = parseFloat(item.dataset.price);
+    totalPrice += num * price;
   });
   document.getElementById("totalPrice").innerText = totalPrice.toFixed(2);
 }
 
-function switchGame(g) {
-  document.querySelectorAll(".game-content").forEach(x => x.classList.remove("active"));
-  document.getElementById(g+"-page").classList.add("active");
-  document.querySelectorAll(".game-btn").forEach(b => b.classList.remove("active"));
+// 游戏标签切换
+function switchGame(gameId) {
+  document.querySelectorAll(".game-content").forEach(elem => elem.classList.remove("active"));
+  document.getElementById(`${gameId}-page`).classList.add("active");
+  document.querySelectorAll(".game-btn").forEach(btn => btn.classList.remove("active"));
   event.target.classList.add("active");
 }
 
-function switchPage(p) {
-  document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
-  document.getElementById(p).classList.add("active");
-  document.getElementById("total-bar").style.display = p=="order-page"?"flex":"none";
-  if(p=="hitter-page") refreshHitterPage();
-  if(p=="service-page") renderServiceOrders();
-  if(p=="admin-page") renderAdminPages();
+// 页面切换核心逻辑
+function switchPage(pageId) {
+  const needHitterLogin = ["hitter-page", "applyComplete-page", "withdraw-apply-page"];
+  if (needHitterLogin.includes(pageId) && !isHitterLogin) {
+    alert("请先登录打手账号！");
+    switchPage("hitter-login-page");
+    return;
+  }
+
+  document.querySelectorAll(".page").forEach(elem => elem.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+
+  if (pageId === "hitter-page") refreshHitterPage();
+  if (pageId === "service-page") renderServiceOrders();
+  if (pageId === "admin-page") renderAdminPages();
+
+  document.getElementById("total-bar").style.display = pageId === "order-page" ? "flex" : "none";
+}
+
+// 打手登录状态校验
+function checkHitterLoginStatus() {
+  const hitterTab = document.getElementById("hitterTab");
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (isHitterLogin) {
+    hitterTab.classList.add("active");
+    hitterTab.classList.remove("normal");
+    logoutBtn.style.display = "block";
+  } else {
+    hitterTab.classList.remove("active");
+    hitterTab.classList.add("normal");
+    logoutBtn.style.display = "none";
+  }
 }
 
 function toHitterLogin() {
   switchPage(isHitterLogin ? "hitter-page" : "hitter-login-page");
 }
 
+// 打手登录
 function loginHitter() {
-  let a = document.getElementById("hitterAccount").value;
-  let p = document.getElementById("hitterPwd").value;
-  let h = cloudData.hitters.find(x=>x.account==a&&x.pwd==p);
-  if(!h) return alert("账号或密码错误");
-  currentHitter = h;
+  const account = document.getElementById("hitterAccount").value.trim();
+  const pwd = document.getElementById("hitterPwd").value.trim();
+  const hitter = cloudData.hitters.find(h => h.account === account && h.pwd === pwd);
+  
+  if (!hitter) {
+    alert("打手账号或密码错误！");
+    return;
+  }
+
+  currentHitter = hitter;
   isHitterLogin = true;
-  document.getElementById("hitterTab").classList.add("active");
-  document.getElementById("logoutBtn").style.display = "block";
+  checkHitterLoginStatus();
+  alert("登录成功！");
   switchPage("hitter-page");
 }
 
+// 打手退出
 function logoutHitter() {
-  currentHitter = null;
-  isHitterLogin = false;
-  document.getElementById("hitterTab").classList.remove("active");
-  document.getElementById("logoutBtn").style.display = "none";
-  switchPage("order-page");
+  if (confirm("确定要退出登录吗？")) {
+    currentHitter = null;
+    isHitterLogin = false;
+    checkHitterLoginStatus();
+    switchPage("order-page");
+  }
 }
 
+// 玩家提交订单（同步云端）
 async function submitOrder() {
-  let uid = document.getElementById("userId").value;
-  let ok = document.getElementById("agreeAdult").checked;
-  let pic = document.getElementById("payPic").files[0];
-  if(!uid || !ok || !pic || totalPrice<=0) return alert("信息不全");
+  const userId = document.getElementById("userId").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const isAgree = document.getElementById("agreeAdult").checked;
+  const payPic = document.getElementById("payPic").files[0];
 
-  let goods = [];
-  document.querySelectorAll(".item").forEach(i=>{
-    let n = +i.querySelector(".num").innerText;
-    if(n>0) goods.push({name:i.dataset.name,price:+i.dataset.price,num:n});
+  if (!userId || !isAgree || !payPic || totalPrice <= 0) {
+    alert("请完善下单信息、勾选协议并上传支付截图！");
+    return;
+  }
+
+  if (!confirm(`确认提交总计¥${totalPrice.toFixed(2)}的订单吗？`)) return;
+
+  const goodsList = [];
+  document.querySelectorAll(".item").forEach(item => {
+    const num = parseInt(item.querySelector(".num").innerText);
+    if (num > 0) {
+      goodsList.push({
+        name: item.dataset.name,
+        price: parseFloat(item.dataset.price),
+        num: num
+      });
+    }
   });
 
-  let order = {
+  const newOrder = {
     id: Date.now(),
-    userId: uid,
-    contact: document.getElementById("contact").value,
-    goods: goods,
+    userId,
+    contact,
+    goods: goodsList,
     total: totalPrice,
-    payPhoto: await fileToBase64(pic),
+    payPhoto: await fileToBase64(payPic),
     time: new Date().toLocaleString(),
-    status: -1
+    status: -1,
+    proofPhoto: null
   };
 
-  cloudData.orders.unshift(order);
-  await saveCloudData();
-  alert("下单成功！");
-  location.reload();
+  cloudData.orders.unshift(newOrder);
+  const saveResult = await saveCloudData();
+  if (saveResult) {
+    alert("订单提交成功！客服将尽快审核");
+    location.reload();
+  }
 }
 
+// 凭证预览
 function previewPhoto() {
-  let f = document.getElementById("proofPhoto").files[0];
-  if(!f) return;
-  fileToBase64(f).then(b=>{
-    document.getElementById("photoPreview").src = b;
-    document.getElementById("photoPreview").style.display = "block";
+  const proofPic = document.getElementById("proofPhoto").files[0];
+  if (!proofPic) return;
+
+  fileToBase64(proofPic).then(base64 => {
+    const previewImg = document.getElementById("photoPreview");
+    previewImg.src = base64;
+    previewImg.style.display = "block";
   });
 }
 
-function applyCompleteOrder(id) {
-  currentApplyOrderId = id;
+// 提交结单申请（同步云端）
+function applyCompleteOrder(orderId) {
+  currentApplyOrderId = orderId;
   switchPage("applyComplete-page");
 }
 
 async function submitApply() {
-  let src = document.getElementById("photoPreview").src;
-  if(!src) return alert("请上传凭证");
-  let o = cloudData.orders.find(x=>x.id==currentApplyOrderId);
-  if(o) {
-    o.proofPhoto = src;
-    o.status = 2;
-    await saveCloudData();
+  const previewSrc = document.getElementById("photoPreview").src;
+  if (!previewSrc || previewSrc === "none") {
+    alert("请先上传服务完成凭证！");
+    return;
   }
-  alert("已提交审核");
-  switchPage("hitter-page");
-}
 
-async function hitterAcceptOrder(id) {
-  let o = cloudData.orders.find(x=>x.id==id);
-  if(o) {
-    o.status = 1;
-    await saveCloudData();
-    alert("接单成功");
-    switchPage("hitter-page");
+  const targetOrder = cloudData.orders.find(o => o.id === currentApplyOrderId);
+  if (targetOrder) {
+    targetOrder.proofPhoto = previewSrc;
+    targetOrder.status = 2;
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      alert("结单申请已提交，等待管理员审核！");
+      switchPage("hitter-page");
+    }
   }
 }
 
-function showServiceLogin() { switchPage("service-login-page"); }
+// 打手接单（同步云端）
+async function hitterAcceptOrder(orderId) {
+  const targetOrder = cloudData.orders.find(o => o.id === orderId);
+  if (targetOrder) {
+    targetOrder.status = 1;
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      alert("接单成功！服务完成后请上传凭证");
+      switchPage("hitter-page");
+    }
+  }
+}
+
+// 客服登录
+function showServiceLogin() {
+  switchPage("service-login-page");
+}
+
 function checkServicePwd() {
-  if(document.getElementById("servicePwd").value==SERVICE_PWD) switchPage("service-page");
-  else alert("密码错误");
-}
-
-function renderServiceOrders() {
-  let list = cloudData.orders.filter(o=>o.status==-1);
-  let html = "";
-  if(list.length==0) html='<div class="empty-tip">暂无订单</div>';
-  else list.forEach(o=>{
-    html+=`<div class="order-item">
-      <div>玩家：${o.userId}</div>
-      <div>金额：¥${o.total.toFixed(2)}</div>
-      <img src="${o.payPhoto}" class="photo-preview">
-      <button onclick="servicePass(${o.id})" class="status-btn status-accept">通过</button>
-      <button onclick="serviceReject(${o.id})" class="status-btn status-reject">拒绝</button>
-    </div>`;
-  });
-  document.getElementById("serviceOrderList").innerHTML = html;
-}
-
-async function servicePass(id) {
-  let o = cloudData.orders.find(x=>x.id==id);
-  if(o) { o.status=0; await saveCloudData(); renderServiceOrders(); }
-}
-
-async function serviceReject(id) {
-  let r = prompt("拒绝理由：");
-  if(!r) return;
-  let o = cloudData.orders.find(x=>x.id==id);
-  if(o) {
-    o.status=-2;
-    cloudData.rejects.push({id:Date.now(),orderId:id,userId:o.userId,payPhoto:o.payPhoto,reason:r,status:0});
-    await saveCloudData();
-    renderServiceOrders();
+  if (document.getElementById("servicePwd").value === SERVICE_PWD) {
+    switchPage("service-page");
+  } else {
+    alert("客服密码错误！");
   }
 }
 
-function showAdminPassword() { switchPage("password-page"); }
-function checkAdminPassword() {
-  if(document.getElementById("adminPassword").value==DEFAULT_ADMIN_PWD) switchPage("admin-page");
-  else alert("密码错误");
+// 渲染客服待审核订单
+function renderServiceOrders() {
+  const orderList = document.getElementById("serviceOrderList");
+  const pendingOrders = cloudData.orders.filter(o => o.status === -1);
+
+  if (pendingOrders.length === 0) {
+    orderList.innerHTML = '<div class="empty-tip">暂无待审核订单</div>';
+    return;
+  }
+
+  let html = "";
+  pendingOrders.forEach(order => {
+    let goodsHtml = "";
+    order.goods.forEach(good => {
+      goodsHtml += `${good.name}×${good.num}<br>`;
+    });
+
+    html += `
+      <div class="order-item">
+        <div class="order-user">玩家ID：${order.userId}</div>
+        <div class="order-time">下单时间：${order.time}</div>
+        <div class="order-goods">商品：${goodsHtml}</div>
+        <div class="order-user">总计金额：¥${order.total.toFixed(2)}</div>
+        <img src="${order.payPhoto}" class="photo-preview" alt="支付截图">
+        <div class="order-opt">
+          <button class="status-btn status-accept" onclick="servicePass(${order.id})">审核通过</button>
+          <button class="status-btn status-reject" onclick="serviceReject(${order.id})">审核拒绝</button>
+        </div>
+      </div>
+    `;
+  });
+
+  orderList.innerHTML = html;
 }
 
+// 客服审核通过（同步云端）
+async function servicePass(orderId) {
+  const targetOrder = cloudData.orders.find(o => o.id === orderId);
+  if (targetOrder) {
+    targetOrder.status = 0;
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      renderServiceOrders();
+      alert("订单审核通过，已进入打手接单池！");
+    }
+  }
+}
+
+// 客服审核拒绝（同步云端）
+async function serviceReject(orderId) {
+  const reason = prompt("请输入拒绝理由：");
+  if (!reason) return;
+
+  const targetOrder = cloudData.orders.find(o => o.id === orderId);
+  if (targetOrder) {
+    targetOrder.status = -2;
+    cloudData.rejects.push({
+      id: Date.now(),
+      orderId,
+      userId: targetOrder.userId,
+      payPhoto: targetOrder.payPhoto,
+      reason,
+      status: 0
+    });
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      renderServiceOrders();
+      alert("拒绝申请已提交，等待管理员确认！");
+    }
+  }
+}
+
+// 管理员登录
+function showAdminPassword() {
+  switchPage("password-page");
+}
+
+function checkAdminPassword() {
+  if (document.getElementById("adminPassword").value === DEFAULT_ADMIN_PWD) {
+    switchPage("admin-page");
+  } else {
+    alert("管理员密码错误！");
+  }
+}
+
+// 渲染管理员后台所有列表
 function renderAdminPages() {
   renderAdminOrderList();
   renderAdminRejectList();
   renderAdminWithdrawList();
 }
 
+// 渲染管理员待审核结单
 function renderAdminOrderList() {
-  let list = cloudData.orders.filter(o=>o.status==2);
-  let html = list.length ? list.map(o=>`
-    <div class="order-item">
-      <div>${o.userId}  ¥${o.total.toFixed(2)}</div>
-      <img src="${o.proofPhoto}" class="photo-preview">
-      <button onclick="adminApproveOrder(${o.id})" class="status-btn status-accept">通过</button>
-    </div>
-  `).join("") : '<div class="empty-tip">无</div>';
-  document.getElementById("adminOrderList").innerHTML = html;
-}
+  const list = document.getElementById("adminOrderList");
+  const pendingOrders = cloudData.orders.filter(o => o.status === 2);
 
-async function adminApproveOrder(id) {
-  let o = cloudData.orders.find(x=>x.id==id);
-  if(o) {
-    o.status=3;
-    let h = cloudData.hitters.find(x=>x.account==currentHitter?.account);
-    if(h) h.money += o.total*0.8;
-    await saveCloudData();
-    renderAdminOrderList();
+  if (pendingOrders.length === 0) {
+    list.innerHTML = '<div class="empty-tip">暂无待审核结单</div>';
+    return;
   }
-}
 
-function renderAdminRejectList() {
-  let list = cloudData.rejects.filter(r=>r.status==0);
-  let html = list.length ? list.map(r=>`
-    <div class="order-item">
-      <div>${r.userId}</div>
-      <div class="reject-reason">${r.reason}</div>
-      <button onclick="adminRejectPass(${r.id})" class="status-btn status-reject">确认拒绝</button>
-    </div>
-  `).join("") : '<div class="empty-tip">无</div>';
-  document.getElementById("adminRejectList").innerHTML = html;
-}
-
-async function adminRejectPass(id) {
-  let r = cloudData.rejects.find(x=>x.id==id);
-  if(r) { r.status=1; await saveCloudData(); renderAdminRejectList(); }
-}
-
-async function submitWithdrawApply() {
-  let amt = +document.getElementById("withdrawAmount").value;
-  let acc = document.getElementById("withdrawAccount").value;
-  let name = document.getElementById("withdrawName").value;
-  if(amt<0.1||amt>currentHitter.money||!acc||!name) return alert("信息错误");
-  cloudData.withdraws.push({
-    id:Date.now(),hitter:currentHitter.account,amount:amt,account:acc,name:name,status:0
-  });
-  await saveCloudData();
-  alert("已提交");
-  switchPage("hitter-page");
-}
-
-function renderAdminWithdrawList() {
-  let list = cloudData.withdraws.filter(w=>w.status==0);
-  let html = list.length ? list.map(w=>`
-    <div class="withdraw-item">
-      <div>${w.hitter}  ¥${w.amount.toFixed(2)}</div>
-      <div>${w.account} ${w.name}</div>
-      <button onclick="adminApproveWithdraw(${w.id})" class="status-btn status-accept">通过</button>
-    </div>
-  `).join("") : '<div class="empty-tip">无</div>';
-  document.getElementById("adminWithdrawList").innerHTML = html;
-}
-
-async function adminApproveWithdraw(id) {
-  let w = cloudData.withdraws.find(x=>x.id==id);
-  if(w) {
-    w.status=1;
-    let h = cloudData.hitters.find(x=>x.account==w.hitter);
-    if(h) h.money = Math.max(0,h.money-w.amount);
-    await saveCloudData();
-    renderAdminWithdrawList();
-  }
-}
-
-function refreshHitterPage() {
-  if(!currentHitter) return;
-  document.getElementById("walletAmount").innerText = currentHitter.money.toFixed(2);
-  let list = cloudData.orders.filter(o=>o.status>=0&&o.status<=2);
   let html = "";
-  if(list.length==0) html='<div class="empty-tip">暂无订单</div>';
-  else list.forEach(o=>{
-    let btn = "";
-    if(o.status==0) btn=`<button onclick="hitterAcceptOrder(${o.id})" class="status-btn status-accept">接单</button>`;
-    else if(o.status==1) btn=`<button onclick="applyCompleteOrder(${o.id})" class="status-btn status-wait">结单</button>`;
-    else btn=`<button disabled class="status-btn status-pending">审核中</button>`;
-    html+=`<div class="order-item"><div>${o.userId}</div>${btn}</div>`;
+  pendingOrders.forEach(order => {
+    html += `
+      <div class="order-item">
+        <div>玩家ID：${order.userId}</div>
+        <div>订单金额：¥${order.total.toFixed(2)}</div>
+        <div>结单凭证：</div>
+        <img src="${order.proofPhoto}" class="photo-preview">
+        <button class="status-btn status-accept" onclick="adminApproveOrder(${order.id})">审核通过（打手可提现）</button>
+      </div>
+    `;
   });
-  document.getElementById("hitterOrderList").innerHTML = html;
+  list.innerHTML = html;
 }
 
-window.onload = async ()=>{
+// 管理员审核结单通过（同步云端）
+async function adminApproveOrder(orderId) {
+  const targetOrder = cloudData.orders.find(o => o.id === orderId);
+  if (targetOrder) {
+    targetOrder.status = 3;
+    const hitter = cloudData.hitters.find(h => h.account === currentHitter?.account);
+    if (hitter) {
+      hitter.money += targetOrder.total * 0.8;
+    }
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      renderAdminOrderList();
+      alert("结单审核通过，打手佣金已到账！");
+    }
+  }
+}
+
+// 渲染管理员待审核拒绝申请
+function renderAdminRejectList() {
+  const list = document.getElementById("adminRejectList");
+  const pendingRejects = cloudData.rejects.filter(r => r.status === 0);
+
+  if (pendingRejects.length === 0) {
+    list.innerHTML = '<div class="empty-tip">暂无待审核拒绝申请</div>';
+    return;
+  }
+
+  let html = "";
+  pendingRejects.forEach(reject => {
+    html += `
+      <div class="order-item">
+        <div>玩家ID：${reject.userId}</div>
+        <div class="reject-reason">拒绝理由：${reject.reason}</div>
+        <img src="${reject.payPhoto}" class="photo-preview">
+        <button class="status-btn status-reject" onclick="adminRejectPass(${reject.id})">确认拒绝</button>
+      </div>
+    `;
+  });
+  list.innerHTML = html;
+}
+
+// 管理员确认拒绝（同步云端）
+async function adminRejectPass(rejectId) {
+  const targetReject = cloudData.rejects.find(r => r.id === rejectId);
+  if (targetReject) {
+    targetReject.status = 1;
+    const targetOrder = cloudData.orders.find(o => o.id === targetReject.orderId);
+    if (targetOrder) targetOrder.status = -3;
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      renderAdminRejectList();
+      alert("拒绝申请已确认生效！");
+    }
+  }
+}
+
+// 提交提现申请（同步云端）
+async function submitWithdrawApply() {
+  const amount = parseFloat(document.getElementById("withdrawAmount").value) || 0;
+  const account = document.getElementById("withdrawAccount").value.trim();
+  const name = document.getElementById("withdrawName").value.trim();
+
+  if (amount < 0.1) {
+    alert("提现金额最低0.1元！");
+    return;
+  }
+  if (amount > currentHitter.money) {
+    alert("提现金额超出可提现余额！");
+    return;
+  }
+  if (!account || !name) {
+    alert("请完善收款信息！");
+    return;
+  }
+
+  const newWithdraw = {
+    id: Date.now(),
+    hitter: currentHitter.account,
+    amount,
+    account,
+    name,
+    status: 0
+  };
+
+  cloudData.withdraws.push(newWithdraw);
+  const saveResult = await saveCloudData();
+  if (saveResult) {
+    alert("提现申请已提交，等待管理员审核！");
+    switchPage("hitter-page");
+  }
+}
+
+// 渲染管理员待审核提现
+function renderAdminWithdrawList() {
+  const list = document.getElementById("adminWithdrawList");
+  const pendingWithdraws = cloudData.withdraws.filter(w => w.status === 0);
+
+  if (pendingWithdraws.length === 0) {
+    list.innerHTML = '<div class="empty-tip">暂无待审核提现申请</div>';
+    return;
+  }
+
+  let html = "";
+  pendingWithdraws.forEach(withdraw => {
+    html += `
+      <div class="withdraw-item">
+        <div>打手账号：${withdraw.hitter}</div>
+        <div class="withdraw-amount">提现金额：¥${withdraw.amount.toFixed(2)}</div>
+        <div class="withdraw-account">收款账号：${withdraw.account}</div>
+        <div class="withdraw-account">收款人：${withdraw.name}</div>
+        <button class="status-btn status-accept" onclick="adminApproveWithdraw(${withdraw.id})">审核通过</button>
+      </div>
+    `;
+  });
+  list.innerHTML = html;
+}
+
+// 管理员审核提现通过（同步云端）
+async function adminApproveWithdraw(withdrawId) {
+  const targetWithdraw = cloudData.withdraws.find(w => w.id === withdrawId);
+  if (targetWithdraw) {
+    targetWithdraw.status = 1;
+    const hitter = cloudData.hitters.find(h => h.account === targetWithdraw.hitter);
+    if (hitter) hitter.money = Math.max(0, hitter.money - targetWithdraw.amount);
+    const saveResult = await saveCloudData();
+    if (saveResult) {
+      renderAdminWithdrawList();
+      alert("提现申请审核通过！");
+    }
+  }
+}
+
+// 刷新打手页面数据
+function refreshHitterPage() {
+  if (!currentHitter) return;
+  document.getElementById("walletAmount").innerText = currentHitter.money.toFixed(2);
+
+  const hitterOrderList = document.getElementById("hitterOrderList");
+  const hitterOrders = cloudData.orders.filter(o => o.status >= 0 && o.status <= 2);
+
+  if (hitterOrders.length === 0) {
+    hitterOrderList.innerHTML = '<div class="empty-tip">暂无待处理订单</div>';
+    return;
+  }
+
+  let html = "";
+  hitterOrders.forEach(order => {
+    let goodsHtml = "";
+    order.goods.forEach(good => {
+      goodsHtml += `${good.name}×${good.num}<br>`;
+    });
+
+    let actionBtn = "";
+    if (order.status === 0) {
+      actionBtn = `<button class="status-btn status-accept" onclick="hitterAcceptOrder(${order.id})">接单</button>`;
+    } else if (order.status === 1) {
+      actionBtn = `<button class="status-btn status-wait" onclick="applyCompleteOrder(${order.id})">提交结单凭证</button>`;
+    } else if (order.status === 2) {
+      actionBtn = `<button class="status-btn status-pending" disabled>待管理员审核</button>`;
+    }
+
+    html += `
+      <div class="order-item">
+        <div>玩家ID：${order.userId}</div>
+        <div>商品：${goodsHtml}</div>
+        <div>订单金额：¥${order.total.toFixed(2)}</div>
+        <div class="order-opt">${actionBtn}</div>
+      </div>
+    `;
+  });
+
+  hitterOrderList.innerHTML = html;
+}
+
+// 页面加载时自动拉取云端数据
+window.onload = async () => {
   await loadCloudData();
   calculateTotal();
+  checkHitterLoginStatus();
 };
 </script>
 </body>
